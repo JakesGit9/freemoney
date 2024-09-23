@@ -17,7 +17,6 @@
             width: 150px;
             height: 150px;
             cursor: grab;
-            transition: opacity 0.5s;
         }
     </style>
 </head>
@@ -60,12 +59,6 @@
 
         // Make ad draggable
         makeDraggable(adDiv);
-
-        // Fade out and remove ad after 10 seconds
-        setTimeout(() => {
-            adDiv.style.opacity = 0;
-            setTimeout(() => adDiv.remove(), 500);
-        }, 10000);
     }
 
     function makeDraggable(element) {
