@@ -14,9 +14,12 @@
 
         .ad {
             position: absolute;
-            width: 150px;
-            height: 150px;
             cursor: grab;
+        }
+
+        .ad img {
+            max-width: 200px;  /* Set a max size for the ads */
+            max-height: 200px; /* This can be adjusted or removed as needed */
         }
     </style>
 </head>
@@ -48,11 +51,20 @@
         adDiv.classList.add('ad');
         adDiv.href = adLinks[randomIndex];  // Assign link to ad
         adDiv.target = '_blank';  // Open link in new tab
-        adDiv.innerHTML = `<img src="${adImages[randomIndex]}" alt="ad" style="width: 100%; height: 100%;">`;
 
-        // Set random position
-        adDiv.style.top = Math.random() * (window.innerHeight - 150) + 'px';
-        adDiv.style.left = Math.random() * (window.innerWidth - 150) + 'px';
+        // Create image element and set source
+        const adImage = new Image();
+        adImage.src = adImages[randomIndex];
+        adImage.alt = "ad";
+
+        // Wait for image to load to adjust ad position based on its size
+        adImage.onload = function() {
+            adDiv.style.top = Math.random() * (window.innerHeight - adImage.height) + 'px';
+            adDiv.style.left = Math.random() * (window.innerWidth - adImage.width) + 'px';
+        };
+
+        // Add image to adDiv
+        adDiv.appendChild(adImage);
 
         // Append ad to body
         document.body.appendChild(adDiv);
