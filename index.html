@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joke Website</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        .ad {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            cursor: grab;
+            transition: opacity 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    // Array of ad image URLs
+    const adImages = [
+        'ad1.jpg', 'ad2.jpg', 'ad3.jpg', 'ad4.jpg', 'ad5.jpg', // Replace with actual image paths
+        'ad6.jpg', 'ad7.jpg', 'ad8.jpg', 'ad9.jpg', 'ad10.jpg',
+        'ad11.jpg', 'ad12.jpg', 'ad13.jpg', 'ad14.jpg', 'ad15.jpg',
+        'ad16.jpg', 'ad17.jpg', 'ad18.jpg', 'ad19.jpg', 'ad20.jpg',
+        'ad21.jpg', 'ad22.jpg', 'ad23.jpg', 'ad24.jpg', 'ad25.jpg',
+        'ad26.jpg', 'ad27.jpg', 'ad28.jpg', 'ad29.jpg', 'ad30.jpg'
+    ];
+
+    // Array of links for the ads
+    const adLinks = [
+        'https://example.com/1', 'https://example.com/2', 'https://example.com/3', // Replace with actual links
+        // ...more ad links for each image
+    ];
+
+    // Spawn ads every 3 seconds
+    setInterval(spawnAd, 3000);
+
+    function spawnAd() {
+        const adDiv = document.createElement('a');
+        const randomIndex = Math.floor(Math.random() * adImages.length);
+        adDiv.classList.add('ad');
+        adDiv.href = adLinks[randomIndex];  // Assign link to ad
+        adDiv.target = '_blank';  // Open link in new tab
+        adDiv.innerHTML = `<img src="${adImages[randomIndex]}" alt="ad" style="width: 100%; height: 100%;">`;
+
+        // Set random position
+        adDiv.style.top = Math.random() * (window.innerHeight - 150) + 'px';
+        adDiv.style.left = Math.random() * (window.innerWidth - 150) + 'px';
+
+        // Append ad to body
+        document.body.appendChild(adDiv);
+
+        // Make ad draggable
+        makeDraggable(adDiv);
+
+        // Fade out and remove ad after 10 seconds
+        setTimeout(() => {
+            adDiv.style.opacity = 0;
+            setTimeout(() => adDiv.remove(), 500);
+        }, 10000);
+    }
+
+    function makeDraggable(element) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        element.onmousedown = dragMouseDown;
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // Get mouse cursor position at startup
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // Calculate new cursor position
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // Set the element's new position
+            element.style.top = (element.offsetTop - pos2) + "px";
+            element.style.left = (element.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+</script>
+
+</body>
+</html>
