@@ -194,7 +194,7 @@
         }, 1000);
     }
 
-    // Spawn ads with a higher chance near the mouse
+    // Spawn ads with a 5% chance to spawn near the mouse
     function spawnAd() {
         adsSpawned++;
         const adDiv = document.createElement('a');
@@ -208,7 +208,7 @@
         adImage.alt = "ad";
 
         adImage.onload = function () {
-            let spawnNearMouse = Math.random() < 0.7; // 70% chance to spawn near the mouse
+            let spawnNearMouse = Math.random() < 0.05; // 5% chance to spawn near the mouse
             let spawnX, spawnY;
 
             if (spawnNearMouse) {
@@ -240,7 +240,7 @@
         }
     }
 
-    // Make ads draggable and disappear when dragged to edge
+    // Make the ad draggable
     function makeDraggable(element) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
         element.onmousedown = dragMouseDown;
