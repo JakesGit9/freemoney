@@ -137,6 +137,16 @@
     const titleScreen = document.getElementById('titleScreen');
     const lifeSupportImage = document.getElementById('lifeSupportImage');
 
+    // Variables to track mouse position
+    let mouseX = 0;
+    let mouseY = 0;
+
+    // Track mouse position
+    document.onmousemove = function(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    };
+
     // Start the game on button click
     startButton.onclick = function () {
         startButton.style.display = 'none';
@@ -184,7 +194,7 @@
         }, 1000);
     }
 
-    // Spawn ads with a 20% bias near the button
+    // Spawn ads with a higher chance near the mouse
     function spawnAd() {
         adsSpawned++;
         const adDiv = document.createElement('a');
@@ -198,17 +208,25 @@
         adImage.alt = "ad";
 
         adImage.onload = function () {
-            let spawnNearButton = Math.random() < 0.2; // 20% chance to spawn near the button
+            let spawnNearMouse = Math.random() < 0.7; // 70% chance to spawn near the mouse
+            let spawnX, spawnY;
 
-            if (spawnNearButton) {
-                // Spawn near the button
-                adDiv.style.top = (window.innerHeight * 0.5) + Math.random() * 100 - adImage.height / 2 + 'px';
-                adDiv.style.left = (window.innerWidth / 2) + Math.random() * 100 - adImage.width / 2 + 'px';
+            if (spawnNearMouse) {
+                // Spawn near the mouse cursor with a bit of randomness
+                spawnX = mouseX + (Math.random() * 100 - 50); // Randomness of -50 to +50 pixels
+                spawnY = mouseY + (Math.random() * 100 - 50); // Randomness of -50 to +50 pixels
             } else {
                 // Spawn randomly elsewhere
-                adDiv.style.top = Math.random() * (window.innerHeight - adImage.height) + 'px';
-                adDiv.style.left = Math.random() * (window.innerWidth - adImage.width) + 'px';
+                spawnX = Math.random() * (window.innerWidth - adImage.width);
+                spawnY = Math.random() * (window.innerHeight - adImage.height);
             }
+
+            // Ensure ad doesn't spawn off-screen
+            spawnX = Math.max(0, Math.min(spawnX, window.innerWidth - adImage.width));
+            spawnY = Math.max(0, Math.min(spawnY, window.innerHeight - adImage.height));
+
+            adDiv.style.top = spawnY + 'px';
+            adDiv.style.left = spawnX + 'px';
         };
 
         adDiv.appendChild(adImage);
