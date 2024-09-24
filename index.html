@@ -60,9 +60,9 @@
 
         #titleScreen {
             position: absolute;
-            top: 50%;
+            top: 100px; /* Title is now 100px from the top */
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
             font-size: 50px;
             font-weight: bold;
         }
@@ -107,7 +107,7 @@
     ];
 
     let adsSpawned = 0;
-    let adInterval = 1000; // Start spawning every 1 second
+    let adInterval = 250; // Ads start spawning every 250ms
     let timer = 10;
     let gameInterval;
     let spawnInterval;
