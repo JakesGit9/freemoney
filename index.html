@@ -45,7 +45,7 @@
         }
 
         #addTimeButton {
-            top: 50%; /* Center vertically */
+            top: 60%; /* Position below the start button */
             left: 50%; /* Center horizontally */
             transform: translate(-50%, -50%); /* Fully center the button */
             display: none;
@@ -73,7 +73,7 @@
             height: auto;
             margin-bottom: 10px;
             position: absolute;
-            top: 60%; /* Position above the button */
+            top: 50%; /* Position above the button */
             left: 50%;
             transform: translateX(-50%);
         }
@@ -120,7 +120,7 @@
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
-        'https://lordmozart.github.io/scam/',        
+        'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/'
     ];
 
@@ -152,13 +152,12 @@
             timer += 2;
             timerElement.innerText = timer;
             canAddTime = false;
-            addTimeButton.classList.add('disabled'); // Grey out button
-            addTimeButton.disabled = true;
 
             // Change button color to grey for 0.75 seconds
+            addTimeButton.classList.add('disabled'); // Grey out button
             setTimeout(() => {
                 addTimeButton.classList.remove('disabled'); // Remove grey out
-                addTimeButton.disabled = false;
+                canAddTime = true; // Reset the ability to add time
             }, 750); // 0.75 seconds cooldown
 
             // Switch image above button
