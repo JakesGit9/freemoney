@@ -174,18 +174,18 @@
                 canAddTime = true; // Allow adding time again
             }, 750); // 0.75 seconds cooldown
 
-            // Switch image above button
-            const originalImage = lifeSupportImage.src;
-            lifeSupportImage.src = 'image2.png'; // New image on click
+            // Switch image for 0.75 seconds
+            const originalSrc = lifeSupportImage.src;
+            lifeSupportImage.src = "image2.png"; // Change image on click
             setTimeout(() => {
-                lifeSupportImage.src = originalImage; // Reset to original image
-            }, 750); // 0.75 seconds
+                lifeSupportImage.src = originalSrc; // Change it back after 0.75 seconds
+            }, 750);
         }
     };
 
-    // Start the countdown timer
+    // Start the timer countdown
     function startTimer() {
-        gameInterval = setInterval(function () {
+        gameInterval = setInterval(() => {
             timer--;
             timerElement.innerText = timer;
             if (timer <= 0) {
@@ -194,7 +194,7 @@
         }, 1000);
     }
 
-    // Spawn ads with a 5% chance to spawn near the mouse
+    // Spawn ads with a 5% chance to spawn near the mouse and 7% chance to spawn near the button
     function spawnAd() {
         adsSpawned++;
         const adDiv = document.createElement('a');
@@ -209,12 +209,18 @@
 
         adImage.onload = function () {
             let spawnNearMouse = Math.random() < 0.05; // 5% chance to spawn near the mouse
+            let spawnNearButton = Math.random() < 0.07; // 7% chance to spawn near the button
             let spawnX, spawnY;
 
             if (spawnNearMouse) {
                 // Spawn near the mouse cursor with a bit of randomness
                 spawnX = mouseX + (Math.random() * 100 - 50); // Randomness of -50 to +50 pixels
                 spawnY = mouseY + (Math.random() * 100 - 50); // Randomness of -50 to +50 pixels
+            } else if (spawnNearButton) {
+                // Spawn near the add time button with a bit of randomness
+                const buttonRect = addTimeButton.getBoundingClientRect();
+                spawnX = buttonRect.left + (Math.random() * buttonRect.width - buttonRect.width / 2);
+                spawnY = buttonRect.top + (Math.random() * buttonRect.height - buttonRect.height / 2);
             } else {
                 // Spawn randomly elsewhere
                 spawnX = Math.random() * (window.innerWidth - adImage.width);
