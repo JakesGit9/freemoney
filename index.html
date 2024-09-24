@@ -80,7 +80,7 @@
 
         /* Disabled button styling */
         .disabled {
-            background-color: #bbb;
+            background-color: #bbb; /* Grey color */
             cursor: not-allowed;
         }
     </style>
@@ -149,15 +149,19 @@
     // Function to add time to the timer with 0.75-second cooldown
     addTimeButton.onclick = function () {
         if (canAddTime) {
-            timer += 2;
+            timer += 2; // Add 2 seconds to the timer
             timerElement.innerText = timer;
-            canAddTime = false;
+            canAddTime = false; // Disable adding time
 
             // Change button color to grey for 0.75 seconds
             addTimeButton.classList.add('disabled'); // Grey out button
+            addTimeButton.disabled = true; // Disable button
+
+            // Timeout to reset button state
             setTimeout(() => {
                 addTimeButton.classList.remove('disabled'); // Remove grey out
-                canAddTime = true; // Reset the ability to add time
+                addTimeButton.disabled = false; // Re-enable button
+                canAddTime = true; // Allow adding time again
             }, 750); // 0.75 seconds cooldown
 
             // Switch image above button
