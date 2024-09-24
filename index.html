@@ -167,19 +167,19 @@
             addTimeButton.classList.add('disabled'); // Grey out button
             addTimeButton.disabled = true; // Disable button
 
-            // Timeout to reset button state
-            setTimeout(() => {
-                addTimeButton.classList.remove('disabled'); // Remove grey out
-                addTimeButton.disabled = false; // Re-enable button
-                canAddTime = true; // Allow adding time again
-            }, 750); // 0.75 seconds cooldown
-
             // Switch image for 0.75 seconds
             const originalSrc = lifeSupportImage.src;
             lifeSupportImage.src = "image2.png"; // Change image on click
             setTimeout(() => {
                 lifeSupportImage.src = originalSrc; // Change it back after 0.75 seconds
             }, 750);
+
+            // Timeout to reset button state
+            setTimeout(() => {
+                addTimeButton.classList.remove('disabled'); // Remove grey out
+                addTimeButton.disabled = false; // Re-enable button
+                canAddTime = true; // Allow adding time again
+            }, 750); // 0.75 seconds cooldown
         }
     };
 
