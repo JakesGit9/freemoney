@@ -73,7 +73,7 @@
             height: auto;
             margin-bottom: 10px;
             position: absolute;
-            top: -455px; /* Move it up by 500px from the previous position of 45% */
+            top: 40%; /* Moved up from 45% to 40% */
             left: 50%;
             transform: translateX(-50%);
         }
@@ -227,20 +227,23 @@
                 spawnY = Math.random() * (window.innerHeight - adImage.height);
             }
 
-            adDiv.style.position = 'absolute';
+            // Ensure ad doesn't spawn off-screen
+            spawnX = Math.max(0, Math.min(spawnX, window.innerWidth - adImage.width));
+            spawnY = Math.max(0, Math.min(spawnY, window.innerHeight - adImage.height));
+
             adDiv.style.top = spawnY + 'px';
             adDiv.style.left = spawnX + 'px';
-
-            adDiv.appendChild(adImage);
-            document.body.appendChild(adDiv);
-            makeDraggable(adDiv);
-
-            if (adsSpawned % 20 === 0) {
-                adInterval = Math.max(adInterval - 100, 200); // Speed up spawning
-                clearInterval(spawnInterval);
-                spawnInterval = setInterval(spawnAd, adInterval);
-            }
         };
+
+        adDiv.appendChild(adImage);
+        document.body.appendChild(adDiv);
+        makeDraggable(adDiv);
+
+        if (adsSpawned % 20 === 0) {
+            adInterval = Math.max(adInterval - 100, 200); // Speed up spawning
+            clearInterval(spawnInterval);
+            spawnInterval = setInterval(spawnAd, adInterval);
+        }
     }
 
     // Make the ad draggable
