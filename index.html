@@ -109,7 +109,6 @@
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
-        'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/'
     ];
 
@@ -140,12 +139,12 @@
             timer += 2;
             timerElement.innerText = timer;
             canAddTime = false;
-            addTimeButton.classList.add('disabled');
+            addTimeButton.classList.add('disabled'); // Grey out button
             addTimeButton.disabled = true;
 
             setTimeout(() => {
                 canAddTime = true;
-                addTimeButton.classList.remove('disabled');
+                addTimeButton.classList.remove('disabled'); // Remove grey out
                 addTimeButton.disabled = false;
             }, 750); // 0.75 seconds cooldown
         }
