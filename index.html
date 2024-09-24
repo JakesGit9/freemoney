@@ -10,6 +10,10 @@
             height: 100vh;
             overflow: hidden;
             background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
         }
 
         .ad {
@@ -18,27 +22,72 @@
         }
 
         .ad img {
-            max-width: 200px;  /* Set a max size for the ads */
-            max-height: 200px; /* This can be adjusted or removed as needed */
+            max-width: 200px;  
+            max-height: 200px; 
+        }
+
+        #startButton, #addTimeButton {
+            position: absolute;
+            padding: 20px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #startButton {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #addTimeButton {
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+        }
+
+        #timer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        #titleScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
+<div id="timer">10</div>
+<div id="titleScreen">Grampa's life support simulator 2000!</div>
+<button id="startButton">Start Game</button>
+<button id="addTimeButton">kick his life support</button>
+
 <script>
-    // Array of ad image URLs
     const adImages = [
         'ad1.jpg', 'ad2.jpg', 'ad3.jpg', 'ad4.jpg', 'ad5.jpg',
         'ad6.jpg', 'ad7.jpg', 'ad8.jpg', 'ad9.jpg', 'ad10.jpg',
-        'ad11.jpg', 'ad12.jpg', 'ad13.jpg', 'ad14.jpg', 'ad15.jpg',
-        'ad16.jpg', 'ad17.jpg', 'ad18.jpg', 'ad19.jpg', 'ad20.jpg'
+        'ad11.jpg', 'ad12.jpg', 'ad13.jpg', 'ad14.jpg', 'ad15.jpg',   
+        'ad16.jpg', 'ad17.jpg', 'ad18.jpg', 'ad19.jpg', 'ad20.jpg'        
     ];
 
-    // Array of links for the ads
     const adLinks = [
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
+        'https://lordmozart.github.io/scam/',      
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
@@ -50,44 +99,84 @@
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
+        'https://lordmozart.github.io/scam/', 
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
-        'https://lordmozart.github.io/scam/',
-        'https://lordmozart.github.io/scam/',
-        'https://lordmozart.github.io/scam/',
+        'https://lordmozart.github.io/scam/',           
         'https://lordmozart.github.io/scam/'
     ];
 
-    setInterval(spawnAd, 250);
+    let adsSpawned = 0;
+    let adInterval = 1000; // Start spawning every 1 second
+    let timer = 10;
+    let gameInterval;
+    let spawnInterval;
+    let canAddTime = true;
 
+    const timerElement = document.getElementById('timer');
+    const startButton = document.getElementById('startButton');
+    const addTimeButton = document.getElementById('addTimeButton');
+    const titleScreen = document.getElementById('titleScreen');
+
+    // Start the game on button click
+    startButton.onclick = function() {
+        startButton.style.display = 'none';
+        titleScreen.style.display = 'none';
+        addTimeButton.style.display = 'block';
+        startTimer();
+        spawnInterval = setInterval(spawnAd, adInterval);
+    };
+
+    // Function to add time to the timer
+    addTimeButton.onclick = function() {
+        if (canAddTime) {
+            timer += 2;
+            canAddTime = false;
+            setTimeout(() => canAddTime = true, 500);
+        }
+    };
+
+    // Start the countdown timer
+    function startTimer() {
+        gameInterval = setInterval(function() {
+            timer--;
+            timerElement.innerText = timer;
+            if (timer <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    // Spawn ads
     function spawnAd() {
+        adsSpawned++;
         const adDiv = document.createElement('a');
         const randomIndex = Math.floor(Math.random() * adImages.length);
         adDiv.classList.add('ad');
-        adDiv.href = adLinks[randomIndex];  // Assign link to ad
-        adDiv.target = '_blank';  // Open link in new tab
+        adDiv.href = adLinks[randomIndex];
+        adDiv.target = '_blank';
 
-        // Create image element and set source
         const adImage = new Image();
         adImage.src = adImages[randomIndex];
         adImage.alt = "ad";
 
-        // Wait for image to load to adjust ad position based on its size
         adImage.onload = function() {
             adDiv.style.top = Math.random() * (window.innerHeight - adImage.height) + 'px';
             adDiv.style.left = Math.random() * (window.innerWidth - adImage.width) + 'px';
         };
 
-        // Add image to adDiv
         adDiv.appendChild(adImage);
-
-        // Append ad to body
         document.body.appendChild(adDiv);
-
-        // Make ad draggable
         makeDraggable(adDiv);
+
+        if (adsSpawned % 20 === 0) {
+            adInterval = Math.max(adInterval - 100, 200); // Speed up spawning
+            clearInterval(spawnInterval);
+            spawnInterval = setInterval(spawnAd, adInterval);
+        }
     }
 
+    // Make ads draggable and disappear when dragged to edge
     function makeDraggable(element) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
         element.onmousedown = dragMouseDown;
@@ -95,7 +184,6 @@
         function dragMouseDown(e) {
             e = e || window.event;
             e.preventDefault();
-            // Get mouse cursor position at startup
             pos3 = e.clientX;
             pos4 = e.clientY;
             document.onmouseup = closeDragElement;
@@ -105,20 +193,30 @@
         function elementDrag(e) {
             e = e || window.event;
             e.preventDefault();
-            // Calculate new cursor position
             pos1 = pos3 - e.clientX;
             pos2 = pos4 - e.clientY;
             pos3 = e.clientX;
             pos4 = e.clientY;
-            // Set the element's new position
             element.style.top = (element.offsetTop - pos2) + "px";
             element.style.left = (element.offsetLeft - pos1) + "px";
+
+            // If ad is dragged out of bounds, remove it
+            if (element.offsetTop < 0 || element.offsetLeft < 0 || element.offsetTop > window.innerHeight - element.clientHeight || element.offsetLeft > window.innerWidth - element.clientWidth) {
+                document.body.removeChild(element);
+            }
         }
 
         function closeDragElement() {
             document.onmouseup = null;
             document.onmousemove = null;
         }
+    }
+
+    // End the game
+    function endGame() {
+        clearInterval(gameInterval);
+        clearInterval(spawnInterval);
+        alert("Game Over!");
     }
 </script>
 
