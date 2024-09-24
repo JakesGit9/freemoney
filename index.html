@@ -22,17 +22,17 @@
         }
 
         .ad img {
-            max-width: 200px;  
-            max-height: 200px; 
+            max-width: 200px;
+            max-height: 200px;
         }
 
         #startButton, #addTimeButton {
             position: absolute;
-            padding: 25px; /* Slightly larger */
-            background-color: #ff5722;
+            padding: 25px;
+            background-color: #007bff; /* Blue color */
             color: white;
             border: none;
-            font-size: 22px; /* Slightly larger */
+            font-size: 22px;
             cursor: pointer;
             border-radius: 5px;
             transition: background-color 0.3s;
@@ -45,9 +45,9 @@
         }
 
         #addTimeButton {
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 50%; /* Center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%); /* Fully center the button */
             display: none;
         }
 
@@ -86,15 +86,14 @@
     const adImages = [
         'ad1.jpg', 'ad2.jpg', 'ad3.jpg', 'ad4.jpg', 'ad5.jpg',
         'ad6.jpg', 'ad7.jpg', 'ad8.jpg', 'ad9.jpg', 'ad10.jpg',
-        'ad11.jpg', 'ad12.jpg', 'ad13.jpg', 'ad14.jpg', 'ad15.jpg',   
-        'ad16.jpg', 'ad17.jpg', 'ad18.jpg', 'ad19.jpg', 'ad20.jpg'        
+        'ad11.jpg', 'ad12.jpg', 'ad13.jpg', 'ad14.jpg', 'ad15.jpg',
+        'ad16.jpg', 'ad17.jpg', 'ad18.jpg', 'ad19.jpg', 'ad20.jpg'
     ];
 
     const adLinks = [
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
-        'https://lordmozart.github.io/scam/',      
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
@@ -106,10 +105,11 @@
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
-        'https://lordmozart.github.io/scam/', 
         'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/',
-        'https://lordmozart.github.io/scam/',           
+        'https://lordmozart.github.io/scam/',
+        'https://lordmozart.github.io/scam/',
+        'https://lordmozart.github.io/scam/',
         'https://lordmozart.github.io/scam/'
     ];
 
@@ -126,7 +126,7 @@
     const titleScreen = document.getElementById('titleScreen');
 
     // Start the game on button click
-    startButton.onclick = function() {
+    startButton.onclick = function () {
         startButton.style.display = 'none';
         titleScreen.style.display = 'none';
         addTimeButton.style.display = 'block';
@@ -135,7 +135,7 @@
     };
 
     // Function to add time to the timer with 0.75-second cooldown
-    addTimeButton.onclick = function() {
+    addTimeButton.onclick = function () {
         if (canAddTime) {
             timer += 2;
             timerElement.innerText = timer;
@@ -153,7 +153,7 @@
 
     // Start the countdown timer
     function startTimer() {
-        gameInterval = setInterval(function() {
+        gameInterval = setInterval(function () {
             timer--;
             timerElement.innerText = timer;
             if (timer <= 0) {
@@ -175,12 +175,12 @@
         adImage.src = adImages[randomIndex];
         adImage.alt = "ad";
 
-        adImage.onload = function() {
+        adImage.onload = function () {
             let spawnNearButton = Math.random() < 0.2; // 20% chance to spawn near the button
 
             if (spawnNearButton) {
                 // Spawn near the button
-                adDiv.style.top = (window.innerHeight * 0.75) + Math.random() * 100 - adImage.height / 2 + 'px';
+                adDiv.style.top = (window.innerHeight * 0.5) + Math.random() * 100 - adImage.height / 2 + 'px';
                 adDiv.style.left = (window.innerWidth / 2) + Math.random() * 100 - adImage.width / 2 + 'px';
             } else {
                 // Spawn randomly elsewhere
@@ -240,7 +240,7 @@
     function endGame() {
         clearInterval(gameInterval);
         clearInterval(spawnInterval);
-        alert("Game Over!");
+        alert("Oh no, YOUR GRANDPA SURVIVED...");
     }
 </script>
 
