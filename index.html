@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+a<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -103,6 +103,7 @@
       background-color: #ddd;
       border-radius: 10px;
       overflow: hidden;
+      display: none;
     }
 
     #timerBar {
@@ -113,7 +114,7 @@
     }
 
     #gameOverScreen {
-      display: none;
+      display: none; /* ✅ hidden by default */
       position: absolute;
       top: 0;
       left: 0;
@@ -123,11 +124,17 @@
       color: white;
       font-size: 40px;
       font-weight: bold;
-      display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: 20;
+      opacity: 0;
+      transition: opacity 0.8s;
+    }
+
+    #gameOverScreen.show {
+      display: flex;
+      opacity: 1;
     }
 
     #restartButton {
@@ -162,7 +169,7 @@ But beware of the annoying ads that try to block you...</div>
 <button id="startButton">Start Game</button>
 <button id="addTimeButton">Kick His Life Support</button>
 
-<div id="timerContainer" style="display:none;">
+<div id="timerContainer">
   <div id="timerBar"></div>
 </div>
 
@@ -316,14 +323,14 @@ But beware of the annoying ads that try to block you...</div>
   function endGame() {
     clearInterval(gameInterval);
     clearInterval(spawnInterval);
-    gameOverScreen.style.display = "flex";
+    gameOverScreen.classList.add("show");
   }
 
   restartButton.onclick = () => {
     document.querySelectorAll(".ad").forEach(ad => ad.remove());
     adsSpawned = 0;
     adInterval = 800;
-    gameOverScreen.style.display = "none";
+    gameOverScreen.classList.remove("show");
     startButton.style.display = "block";
     instructions.style.display = "block";
     titleScreen.style.display = "block";
