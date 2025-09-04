@@ -20,18 +20,19 @@
     .ad {
       position: absolute;
       cursor: grab;
-      z-index: 5;
+      z-index: 15; /* can cover the button */
       opacity: 0.95;
     }
 
     .ad img {
       max-width: 160px;
       max-height: 160px;
-      pointer-events: none; /* stops clicks from hitting the image itself */
+      user-select: none;
+      pointer-events: none; /* prevents dragging image ghost */
     }
 
     #startButton, #addTimeButton {
-      padding: 28px 40px; /* bigger button */
+      padding: 28px 40px;
       background-color: #007bff;
       color: white;
       border: none;
@@ -172,9 +173,10 @@ But beware of the annoying ads that try to block you...</div>
 
 <script>
   const adImages = ['ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg'];
+  const adLink = "https://lordmozart.github.io/scam/";
 
   let adsSpawned = 0;
-  let adInterval = 800; // ads spawn slower now
+  let adInterval = 800; 
   let timer = 10;
   let gameInterval;
   let spawnInterval;
@@ -190,9 +192,6 @@ But beware of the annoying ads that try to block you...</div>
   const gameOverScreen = document.getElementById("gameOverScreen");
   const restartButton = document.getElementById("restartButton");
   const newUpdateBanner = document.getElementById("newUpdateBanner");
-
-  let mouseX = 0, mouseY = 0;
-  document.onmousemove = e => { mouseX = e.clientX; mouseY = e.clientY; };
 
   startButton.onclick = () => {
     startButton.style.display = "none";
@@ -243,22 +242,27 @@ But beware of the annoying ads that try to block you...</div>
 
   function spawnAd() {
     adsSpawned++;
-    const adDiv = document.createElement("div"); // not a link anymore
+    const adDiv = document.createElement("div");
     adDiv.classList.add("ad");
+
     const adImage = new Image();
     adImage.src = adImages[Math.floor(Math.random() * adImages.length)];
     adDiv.appendChild(adImage);
+
+    // open link if clicked (but dragging won't trigger)
+    adDiv.onclick = () => window.open(adLink, "_blank");
+
     document.body.appendChild(adDiv);
     makeDraggable(adDiv);
 
-    // 40% chance ads spawn near the button to cover it
+    // 50% chance spawn near button
     const buttonRect = addTimeButton.getBoundingClientRect();
-    let spawnNearButton = Math.random() < 0.4;
+    let spawnNearButton = Math.random() < 0.5;
     let spawnX, spawnY;
 
     if (spawnNearButton) {
-      spawnX = buttonRect.left + (Math.random() * buttonRect.width - buttonRect.width / 2);
-      spawnY = buttonRect.top + (Math.random() * buttonRect.height - buttonRect.height / 2);
+      spawnX = buttonRect.left + (Math.random() * buttonRect.width - 80);
+      spawnY = buttonRect.top + (Math.random() * buttonRect.height - 80);
     } else {
       spawnX = Math.random() * (window.innerWidth - 160);
       spawnY = Math.random() * (window.innerHeight - 160);
@@ -269,14 +273,36 @@ But beware of the annoying ads that try to block you...</div>
   }
 
   function makeDraggable(element) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0, isDragging = false;
+
     element.onmousedown = e => {
       e.preventDefault();
       pos3 = e.clientX;
       pos4 = e.clientY;
-      document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+      isDragging = false;
+
+      document.onmouseup = e => {
+        document.onmouseup = null;
+        document.onmousemove = null;
+
+        if (!isDragging) {
+          element.click(); // only count as click if no drag happened
+        } else {
+          // check if at edge → delete
+          if (
+            element.offsetLeft < 20 ||
+            element.offsetTop < 20 ||
+            element.offsetLeft + element.offsetWidth > window.innerWidth - 20 ||
+            element.offsetTop + element.offsetHeight > window.innerHeight - 20
+          ) {
+            element.remove();
+          }
+        }
+      };
+
       document.onmousemove = e => {
         e.preventDefault();
+        isDragging = true;
         pos1 = pos3 - e.clientX;
         pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
