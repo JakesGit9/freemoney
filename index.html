@@ -21,22 +21,23 @@
       position: absolute;
       cursor: grab;
       z-index: 5;
-      opacity: 0.9;
+      opacity: 0.95;
     }
 
     .ad img {
       max-width: 160px;
       max-height: 160px;
+      pointer-events: none; /* stops clicks from hitting the image itself */
     }
 
     #startButton, #addTimeButton {
-      padding: 20px 30px;
+      padding: 28px 40px; /* bigger button */
       background-color: #007bff;
       color: white;
       border: none;
-      font-size: 20px;
+      font-size: 24px;
       cursor: pointer;
-      border-radius: 8px;
+      border-radius: 10px;
       transition: background-color 0.3s, transform 0.1s;
       z-index: 10;
     }
@@ -60,6 +61,23 @@
       font-weight: bold;
       margin-bottom: 10px;
       text-align: center;
+    }
+
+    #newUpdateBanner {
+      background-color: #ff4444;
+      color: white;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 20px;
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
     }
 
     #instructions {
@@ -135,6 +153,7 @@
 </head>
 <body>
 
+<div id="newUpdateBanner">🚨 NEW UPDATE 🚨</div>
 <div id="titleScreen">Grampa's Life Support Simulator 2000!</div>
 <div id="instructions">Keep Grandpa alive by pressing the blue button before the timer runs out!<br>
 But beware of the annoying ads that try to block you...</div>
@@ -153,10 +172,9 @@ But beware of the annoying ads that try to block you...</div>
 
 <script>
   const adImages = ['ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg'];
-  const adLinks = ['https://example.com','https://example.com','https://example.com'];
 
   let adsSpawned = 0;
-  let adInterval = 250;
+  let adInterval = 800; // ads spawn slower now
   let timer = 10;
   let gameInterval;
   let spawnInterval;
@@ -171,6 +189,7 @@ But beware of the annoying ads that try to block you...</div>
   const lifeSupportImage = document.getElementById("lifeSupportImage");
   const gameOverScreen = document.getElementById("gameOverScreen");
   const restartButton = document.getElementById("restartButton");
+  const newUpdateBanner = document.getElementById("newUpdateBanner");
 
   let mouseX = 0, mouseY = 0;
   document.onmousemove = e => { mouseX = e.clientX; mouseY = e.clientY; };
@@ -181,6 +200,7 @@ But beware of the annoying ads that try to block you...</div>
     titleScreen.style.display = "none";
     addTimeButton.style.display = "block";
     timerContainer.style.display = "block";
+    newUpdateBanner.style.display = "none";
     timer = 10;
     updateTimerBar();
     startTimer();
@@ -223,18 +243,29 @@ But beware of the annoying ads that try to block you...</div>
 
   function spawnAd() {
     adsSpawned++;
-    const adDiv = document.createElement("a");
-    const randomIndex = Math.floor(Math.random() * adImages.length);
+    const adDiv = document.createElement("div"); // not a link anymore
     adDiv.classList.add("ad");
-    adDiv.href = adLinks[randomIndex % adLinks.length];
-    adDiv.target = "_blank";
     const adImage = new Image();
-    adImage.src = adImages[randomIndex];
+    adImage.src = adImages[Math.floor(Math.random() * adImages.length)];
     adDiv.appendChild(adImage);
     document.body.appendChild(adDiv);
     makeDraggable(adDiv);
-    adDiv.style.top = Math.random() * (window.innerHeight - 160) + "px";
-    adDiv.style.left = Math.random() * (window.innerWidth - 160) + "px";
+
+    // 40% chance ads spawn near the button to cover it
+    const buttonRect = addTimeButton.getBoundingClientRect();
+    let spawnNearButton = Math.random() < 0.4;
+    let spawnX, spawnY;
+
+    if (spawnNearButton) {
+      spawnX = buttonRect.left + (Math.random() * buttonRect.width - buttonRect.width / 2);
+      spawnY = buttonRect.top + (Math.random() * buttonRect.height - buttonRect.height / 2);
+    } else {
+      spawnX = Math.random() * (window.innerWidth - 160);
+      spawnY = Math.random() * (window.innerHeight - 160);
+    }
+
+    adDiv.style.top = spawnY + "px";
+    adDiv.style.left = spawnX + "px";
   }
 
   function makeDraggable(element) {
@@ -265,11 +296,12 @@ But beware of the annoying ads that try to block you...</div>
   restartButton.onclick = () => {
     document.querySelectorAll(".ad").forEach(ad => ad.remove());
     adsSpawned = 0;
-    adInterval = 250;
+    adInterval = 800;
     gameOverScreen.style.display = "none";
     startButton.style.display = "block";
     instructions.style.display = "block";
     titleScreen.style.display = "block";
+    newUpdateBanner.style.display = "block";
     addTimeButton.style.display = "none";
     timerContainer.style.display = "none";
   };
