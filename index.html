@@ -1,177 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grampa's Life Support Simulator 2000!</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      overflow: hidden;
-      background-color: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      font-family: Arial, sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grampa's Life Support Simulator 2000!</title>
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+}
 
-    .ad {
-      position: absolute;
-      cursor: grab;
-      z-index: 15; /* can cover the button */
-      opacity: 0.95;
-    }
+.ad {
+  position: absolute;
+  cursor: grab;
+  z-index: 15;
+  opacity: 0.95;
+}
 
-    .ad img {
-      max-width: 160px;
-      max-height: 160px;
-      user-select: none;
-      pointer-events: none; /* prevents dragging image ghost */
-    }
+.ad img {
+  max-width: 160px;
+  max-height: 160px;
+  user-select: none;
+  pointer-events: none;
+}
 
-    #startButton, #addTimeButton {
-      padding: 28px 40px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      border-radius: 10px;
-      transition: background-color 0.3s, transform 0.1s;
-      z-index: 10;
-    }
+#startButton, #addTimeButton {
+  padding: 28px 40px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background-color 0.3s, transform 0.1s;
+  z-index: 10;
+}
 
-    #startButton:hover, #addTimeButton:hover {
-      background-color: #0056b3;
-      transform: scale(1.05);
-    }
+#startButton:hover, #addTimeButton:hover { background-color: #0056b3; transform: scale(1.05); }
 
-    #startButton {
-      margin-top: 20px;
-    }
+#startButton { margin-top: 20px; }
+#addTimeButton { display: none; margin-top: 20px; }
 
-    #addTimeButton {
-      display: none;
-      margin-top: 20px;
-    }
+#titleScreen { font-size: 42px; font-weight: bold; margin-bottom: 10px; text-align: center; }
+#newUpdateBanner { background-color: #ff4444; color: white; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 20px; animation: pulse 1.2s infinite; }
+@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
-    #titleScreen {
-      font-size: 42px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      text-align: center;
-    }
+#instructions { font-size: 18px; margin-bottom: 20px; text-align: center; max-width: 500px; }
+#lifeSupportImage { width: 200px; height: auto; margin-bottom: 15px; }
 
-    #newUpdateBanner {
-      background-color: #ff4444;
-      color: white;
-      font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      font-size: 20px;
-      animation: pulse 1.2s infinite;
-    }
+#timerContainer { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 60%; background-color: #ddd; border-radius: 10px; overflow: hidden; display: none; }
+#timerBar { height: 25px; width: 100%; background-color: #28a745; transition: width 0.3s; }
 
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.8; }
-      100% { transform: scale(1); opacity: 1; }
-    }
+#scoreCounter { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); font-size: 24px; font-weight: bold; }
 
-    #instructions {
-      font-size: 18px;
-      margin-bottom: 20px;
-      text-align: center;
-      max-width: 500px;
-    }
+#gameOverScreen {
+  display: none;
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.8); color: white; font-size: 40px; font-weight: bold;
+  flex-direction: column; justify-content: center; align-items: center; z-index: 20; opacity: 0; transition: opacity 0.8s;
+}
 
-    #lifeSupportImage {
-      width: 200px;
-      height: auto;
-      margin-bottom: 15px;
-    }
+#gameOverScreen.show { display: flex; opacity: 1; }
 
-    #timerContainer {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60%;
-      background-color: #ddd;
-      border-radius: 10px;
-      overflow: hidden;
-      display: none;
-    }
+#restartButton { margin-top: 20px; padding: 15px 25px; font-size: 20px; background-color: #ff4444; border: none; border-radius: 8px; color: white; cursor: pointer; transition: background-color 0.3s; }
+#restartButton:hover { background-color: #cc0000; }
 
-    #timerBar {
-      height: 25px;
-      width: 100%;
-      background-color: #28a745;
-      transition: width 0.3s;
-    }
-
-    #gameOverScreen {
-      display: none; /* ✅ hidden by default */
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.8);
-      color: white;
-      font-size: 40px;
-      font-weight: bold;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 20;
-      opacity: 0;
-      transition: opacity 0.8s;
-    }
-
-    #gameOverScreen.show {
-      display: flex;
-      opacity: 1;
-    }
-
-    #restartButton {
-      margin-top: 20px;
-      padding: 15px 25px;
-      font-size: 20px;
-      background-color: #ff4444;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    #restartButton:hover {
-      background-color: #cc0000;
-    }
-
-    .disabled {
-      background-color: #bbb;
-      cursor: not-allowed;
-    }
-  </style>
+.disabled { background-color: #bbb; cursor: not-allowed; }
+</style>
 </head>
 <body>
 
-<div id="newUpdateBanner">🚨 NEW UPDATE, V1.1 🚨</div>
+<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 V1.1</div>
 <div id="titleScreen">Grampa's Life Support Simulator 2000!</div>
-<div id="instructions">Keep Grandpa alive by pressing the blue button before the timer runs out!<br>
-But beware of the annoying ads that try to block you...</div>
+<div id="instructions">Attempt to kill Grandpa by pressing the blue button before the timer runs out!<br>But beware of the annoying ads that try to block you...</div>
 <img id="lifeSupportImage" src="image1.png" alt="Life Support Image">
 <button id="startButton">Start Game</button>
 <button id="addTimeButton">Kick His Life Support</button>
 
-<div id="timerContainer">
-  <div id="timerBar"></div>
-</div>
+<div id="timerContainer"><div id="timerBar"></div></div>
+<div id="scoreCounter">Score: 0</div>
 
 <div id="gameOverScreen">
   <div id="gameOverText">Game Over!</div>
@@ -179,165 +93,165 @@ But beware of the annoying ads that try to block you...</div>
 </div>
 
 <script>
-  const adImages = ['ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg'];
-  const adLink = "https://lordmozart.github.io/scam/";
+const adImages = ['ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg'];
+const adLink = "https://lordmozart.github.io/scam/";
 
-  let adsSpawned = 0;
-  let adInterval = 800; 
-  let timer = 10;
-  let gameInterval;
-  let spawnInterval;
-  let canAddTime = true;
+let adsSpawned = 0;
+let adInterval = 800; 
+let timer = 10;
+let score = 0;
+let gameInterval;
+let spawnInterval;
+let scoreInterval;
+let canAddTime = true;
+let gameRunning = false;
+let mouseX = 0, mouseY = 0;
 
-  const timerContainer = document.getElementById("timerContainer");
-  const timerBar = document.getElementById("timerBar");
-  const startButton = document.getElementById("startButton");
-  const addTimeButton = document.getElementById("addTimeButton");
-  const titleScreen = document.getElementById("titleScreen");
-  const instructions = document.getElementById("instructions");
-  const lifeSupportImage = document.getElementById("lifeSupportImage");
-  const gameOverScreen = document.getElementById("gameOverScreen");
-  const restartButton = document.getElementById("restartButton");
-  const newUpdateBanner = document.getElementById("newUpdateBanner");
+document.onmousemove = e => { mouseX = e.clientX; mouseY = e.clientY; };
 
-  startButton.onclick = () => {
-    startButton.style.display = "none";
-    instructions.style.display = "none";
-    titleScreen.style.display = "none";
-    addTimeButton.style.display = "block";
-    timerContainer.style.display = "block";
-    newUpdateBanner.style.display = "none";
-    timer = 10;
+const timerContainer = document.getElementById("timerContainer");
+const timerBar = document.getElementById("timerBar");
+const scoreCounter = document.getElementById("scoreCounter");
+const startButton = document.getElementById("startButton");
+const addTimeButton = document.getElementById("addTimeButton");
+const titleScreen = document.getElementById("titleScreen");
+const instructions = document.getElementById("instructions");
+const lifeSupportImage = document.getElementById("lifeSupportImage");
+const gameOverScreen = document.getElementById("gameOverScreen");
+const restartButton = document.getElementById("restartButton");
+const newUpdateBanner = document.getElementById("newUpdateBanner");
+
+startButton.onclick = () => {
+  startButton.style.display = "none";
+  instructions.style.display = "none";
+  titleScreen.style.display = "none";
+  addTimeButton.style.display = "block";
+  timerContainer.style.display = "block";
+  newUpdateBanner.style.display = "none";
+  scoreCounter.style.display = "block";
+  timer = 10; score = 0;
+  updateTimerBar(); updateScore();
+  startTimer(); startScore();
+  spawnInterval = setInterval(spawnAd, adInterval);
+  gameRunning = true;
+};
+
+addTimeButton.onclick = () => {
+  if (canAddTime) {
+    timer += 2;
     updateTimerBar();
-    startTimer();
-    spawnInterval = setInterval(spawnAd, adInterval);
-  };
+    canAddTime = false;
+    addTimeButton.classList.add("disabled");
+    addTimeButton.disabled = true;
+    const originalSrc = lifeSupportImage.src;
+    lifeSupportImage.src = "image2.png";
+    setTimeout(() => { lifeSupportImage.src = originalSrc; }, 750);
+    setTimeout(() => {
+      addTimeButton.classList.remove("disabled");
+      addTimeButton.disabled = false;
+      canAddTime = true;
+    }, 750);
+  }
+};
 
-  addTimeButton.onclick = () => {
-    if (canAddTime) {
-      timer += 2;
-      updateTimerBar();
-      canAddTime = false;
-      addTimeButton.classList.add("disabled");
-      addTimeButton.disabled = true;
-      const originalSrc = lifeSupportImage.src;
-      lifeSupportImage.src = "image2.png";
-      setTimeout(() => { lifeSupportImage.src = originalSrc; }, 750);
-      setTimeout(() => {
-        addTimeButton.classList.remove("disabled");
-        addTimeButton.disabled = false;
-        canAddTime = true;
-      }, 750);
+function startTimer() {
+  gameInterval = setInterval(() => {
+    if (!document.hidden && gameRunning) {
+      timer--; updateTimerBar();
+      if (timer <= 0) endGame();
     }
-  };
+  }, 1000);
+}
 
-  function startTimer() {
-    gameInterval = setInterval(() => {
-      timer--;
-      updateTimerBar();
-      if (timer <= 0) {
-        endGame();
-      }
-    }, 1000);
-  }
-
-  function updateTimerBar() {
-    let percent = Math.max(0, Math.min(100, (timer / 10) * 100));
-    timerBar.style.width = percent + "%";
-    timerBar.style.backgroundColor = percent > 50 ? "#28a745" : percent > 20 ? "#ffc107" : "#dc3545";
-  }
-
-  function spawnAd() {
-    adsSpawned++;
-    const adDiv = document.createElement("div");
-    adDiv.classList.add("ad");
-
-    const adImage = new Image();
-    adImage.src = adImages[Math.floor(Math.random() * adImages.length)];
-    adDiv.appendChild(adImage);
-
-    // open link if clicked (but dragging won't trigger)
-    adDiv.onclick = () => window.open(adLink, "_blank");
-
-    document.body.appendChild(adDiv);
-    makeDraggable(adDiv);
-
-    // 50% chance spawn near button
-    const buttonRect = addTimeButton.getBoundingClientRect();
-    let spawnNearButton = Math.random() < 0.5;
-    let spawnX, spawnY;
-
-    if (spawnNearButton) {
-      spawnX = buttonRect.left + (Math.random() * buttonRect.width - 80);
-      spawnY = buttonRect.top + (Math.random() * buttonRect.height - 80);
-    } else {
-      spawnX = Math.random() * (window.innerWidth - 160);
-      spawnY = Math.random() * (window.innerHeight - 160);
+function startScore() {
+  scoreInterval = setInterval(() => {
+    if (!document.hidden && gameRunning) {
+      score++; updateScore();
     }
+  }, 1000);
+}
 
-    adDiv.style.top = spawnY + "px";
-    adDiv.style.left = spawnX + "px";
+function updateTimerBar() {
+  let percent = Math.max(0, Math.min(100, (timer / 10) * 100));
+  timerBar.style.width = percent + "%";
+  timerBar.style.backgroundColor = percent > 50 ? "#28a745" : percent > 20 ? "#ffc107" : "#dc3545";
+}
+
+function updateScore() { scoreCounter.innerText = "Score: " + score; }
+
+function spawnAd() {
+  adsSpawned++;
+  const adDiv = document.createElement("div");
+  adDiv.classList.add("ad");
+  const adImage = new Image();
+  adImage.src = adImages[Math.floor(Math.random()*adImages.length)];
+  adDiv.appendChild(adImage);
+  adDiv.onclick = () => window.open(adLink,"_blank");
+  document.body.appendChild(adDiv);
+  makeDraggable(adDiv);
+
+  const buttonRect = addTimeButton.getBoundingClientRect();
+  let spawnX, spawnY;
+
+  let spawnNearCursor = Math.random() < 0.1; // 10% chance on cursor
+  let spawnNearButton = !spawnNearCursor && Math.random() < 0.5;
+
+  if (spawnNearCursor) {
+    spawnX = mouseX - 80 + (Math.random()*50-25);
+    spawnY = mouseY - 80 + (Math.random()*50-25);
+  } else if (spawnNearButton) {
+    spawnX = buttonRect.left + (Math.random()*buttonRect.width-80);
+    spawnY = buttonRect.top + (Math.random()*buttonRect.height-80);
+  } else {
+    spawnX = Math.random()*(window.innerWidth-160);
+    spawnY = Math.random()*(window.innerHeight-160);
   }
 
-  function makeDraggable(element) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0, isDragging = false;
+  adDiv.style.top = spawnY+"px";
+  adDiv.style.left = spawnX+"px";
 
-    element.onmousedown = e => {
-      e.preventDefault();
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      isDragging = false;
-
-      document.onmouseup = e => {
-        document.onmouseup = null;
-        document.onmousemove = null;
-
-        if (!isDragging) {
-          element.click(); // only count as click if no drag happened
-        } else {
-          // check if at edge → delete
-          if (
-            element.offsetLeft < 20 ||
-            element.offsetTop < 20 ||
-            element.offsetLeft + element.offsetWidth > window.innerWidth - 20 ||
-            element.offsetTop + element.offsetHeight > window.innerHeight - 20
-          ) {
-            element.remove();
-          }
-        }
-      };
-
-      document.onmousemove = e => {
-        e.preventDefault();
-        isDragging = true;
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        element.style.top = (element.offsetTop - pos2) + "px";
-        element.style.left = (element.offsetLeft - pos1) + "px";
-      };
-    };
-  }
-
-  function endGame() {
-    clearInterval(gameInterval);
+  if (adsSpawned % 20 === 0) {
+    adInterval = Math.max(adInterval-100,200);
     clearInterval(spawnInterval);
-    gameOverScreen.classList.add("show");
+    spawnInterval = setInterval(spawnAd, adInterval);
   }
+}
 
-  restartButton.onclick = () => {
-    document.querySelectorAll(".ad").forEach(ad => ad.remove());
-    adsSpawned = 0;
-    adInterval = 800;
-    gameOverScreen.classList.remove("show");
-    startButton.style.display = "block";
-    instructions.style.display = "block";
-    titleScreen.style.display = "block";
-    newUpdateBanner.style.display = "block";
-    addTimeButton.style.display = "none";
-    timerContainer.style.display = "none";
+function makeDraggable(element) {
+  let pos1=0,pos2=0,pos3=0,pos4=0,isDragging=false;
+  element.onmousedown = e => {
+    e.preventDefault(); pos3=e.clientX; pos4=e.clientY; isDragging=false;
+    document.onmouseup = e => {
+      document.onmouseup=null; document.onmousemove=null;
+      if (!isDragging) element.click();
+      else if(element.offsetLeft<20||element.offsetTop<20||element.offsetLeft+element.offsetWidth>window.innerWidth-20||element.offsetTop+element.offsetHeight>window.innerHeight-20) element.remove();
+    };
+    document.onmousemove = e => {
+      e.preventDefault(); isDragging=true;
+      pos1=pos3-e.clientX; pos2=pos4-e.clientY; pos3=e.clientX; pos4=e.clientY;
+      element.style.top=(element.offsetTop-pos2)+"px";
+      element.style.left=(element.offsetLeft-pos1)+"px";
+    };
   };
+}
+
+function endGame() {
+  clearInterval(gameInterval); clearInterval(spawnInterval); clearInterval(scoreInterval);
+  gameRunning=false; gameOverScreen.classList.add("show");
+}
+
+restartButton.onclick = () => {
+  document.querySelectorAll(".ad").forEach(ad=>ad.remove());
+  adsSpawned=0; adInterval=800; timer=10; score=0;
+  gameOverScreen.classList.remove("show");
+  startButton.style.display="block";
+  instructions.style.display="block";
+  titleScreen.style.display="block";
+  newUpdateBanner.style.display="block";
+  addTimeButton.style.display="none";
+  timerContainer.style.display="none";
+  updateScore(); updateTimerBar();
+};
 </script>
 </body>
 </html>
