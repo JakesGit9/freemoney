@@ -55,10 +55,34 @@ body {
 #instructions { font-size: 18px; margin-bottom: 20px; text-align: center; max-width: 500px; }
 #lifeSupportImage { width: 200px; height: auto; margin-bottom: 15px; }
 
-#timerContainer { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 60%; background-color: #ddd; border-radius: 10px; overflow: hidden; display: none; }
-#timerBar { height: 25px; width: 100%; background-color: #28a745; transition: width 0.3s; }
+#timerContainer {
+  position: absolute;
+  top: 60px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  background-color: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  display: none;
+  z-index: 5;
+}
 
-#scoreCounter { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); font-size: 24px; font-weight: bold; }
+#timerBar {
+  height: 25px;
+  width: 100%;
+  background-color: #28a745;
+  transition: width 0.3s;
+}
+
+#scoreCounter {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  z-index: 6;
+}
 
 #gameOverScreen {
   display: none;
@@ -69,6 +93,8 @@ body {
 
 #gameOverScreen.show { display: flex; opacity: 1; }
 
+#finalScore { font-size: 28px; margin-top: 15px; }
+
 #restartButton { margin-top: 20px; padding: 15px 25px; font-size: 20px; background-color: #ff4444; border: none; border-radius: 8px; color: white; cursor: pointer; transition: background-color 0.3s; }
 #restartButton:hover { background-color: #cc0000; }
 
@@ -77,9 +103,9 @@ body {
 </head>
 <body>
 
-<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 V1.1</div>
+<div id="newUpdateBanner">🚨 NEW UPDATE 🚨</div>
 <div id="titleScreen">Grampa's Life Support Simulator 2000!</div>
-<div id="instructions">Attempt to kill Grandpa by pressing the blue button before the timer runs out!<br>But beware of the annoying ads that try to block you...</div>
+<div id="instructions">Attempt to kill grandpa by pressing the blue button before the timer runs out!<br>But beware of the annoying ads that try to block you...</div>
 <img id="lifeSupportImage" src="image1.png" alt="Life Support Image">
 <button id="startButton">Start Game</button>
 <button id="addTimeButton">Kick His Life Support</button>
@@ -89,6 +115,7 @@ body {
 
 <div id="gameOverScreen">
   <div id="gameOverText">Game Over!</div>
+  <div id="finalScore">Final Score: 0</div>
   <button id="restartButton">Restart</button>
 </div>
 
@@ -120,6 +147,7 @@ const lifeSupportImage = document.getElementById("lifeSupportImage");
 const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
 const newUpdateBanner = document.getElementById("newUpdateBanner");
+const finalScore = document.getElementById("finalScore");
 
 startButton.onclick = () => {
   startButton.style.display = "none";
@@ -138,7 +166,7 @@ startButton.onclick = () => {
 
 addTimeButton.onclick = () => {
   if (canAddTime) {
-    timer += 2;
+    timer = Math.min(timer + 2, 10); // ✅ cap at max 10
     updateTimerBar();
     canAddTime = false;
     addTimeButton.classList.add("disabled");
@@ -172,9 +200,13 @@ function startScore() {
 }
 
 function updateTimerBar() {
-  let percent = Math.max(0, Math.min(100, (timer / 10) * 100));
+  let cappedTime = Math.min(timer, 10); // ✅ cap bar
+  let percent = Math.max(0, (cappedTime / 10) * 100);
   timerBar.style.width = percent + "%";
-  timerBar.style.backgroundColor = percent > 50 ? "#28a745" : percent > 20 ? "#ffc107" : "#dc3545";
+  timerBar.style.backgroundColor =
+    percent > 50 ? "#28a745" :
+    percent > 20 ? "#ffc107" :
+    "#dc3545";
 }
 
 function updateScore() { scoreCounter.innerText = "Score: " + score; }
@@ -193,7 +225,7 @@ function spawnAd() {
   const buttonRect = addTimeButton.getBoundingClientRect();
   let spawnX, spawnY;
 
-  let spawnNearCursor = Math.random() < 0.1; // 10% chance on cursor
+  let spawnNearCursor = Math.random() < 0.1; // 10% chance
   let spawnNearButton = !spawnNearCursor && Math.random() < 0.5;
 
   if (spawnNearCursor) {
@@ -237,7 +269,9 @@ function makeDraggable(element) {
 
 function endGame() {
   clearInterval(gameInterval); clearInterval(spawnInterval); clearInterval(scoreInterval);
-  gameRunning=false; gameOverScreen.classList.add("show");
+  gameRunning=false;
+  finalScore.innerText = "Final Score: " + score; // ✅ freeze score
+  gameOverScreen.classList.add("show");
 }
 
 restartButton.onclick = () => {
