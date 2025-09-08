@@ -103,7 +103,7 @@ body {
 </head>
 <body>
 
-<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 v1.982</div>
+<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 v1.48</div>
 <div id="titleScreen">Grampa's Life Support Simulator 2000!</div>
 <div id="instructions">Attempt to kill grandpa by pressing the blue button before the timer runs out!<br>But beware of the annoying ads that try to block you...</div>
 <img id="lifeSupportImage" src="image1.png" alt="Life Support Image">
@@ -166,7 +166,7 @@ startButton.onclick = () => {
 
 addTimeButton.onclick = () => {
   if (canAddTime) {
-    timer = Math.min(timer + 2, 10); // ✅ cap at max 10
+    timer = Math.min(timer + 2, 10);
     updateTimerBar();
     canAddTime = false;
     addTimeButton.classList.add("disabled");
@@ -200,7 +200,7 @@ function startScore() {
 }
 
 function updateTimerBar() {
-  let cappedTime = Math.min(timer, 10); // ✅ cap bar
+  let cappedTime = Math.min(timer, 10);
   let percent = Math.max(0, (cappedTime / 10) * 100);
   timerBar.style.width = percent + "%";
   timerBar.style.backgroundColor =
@@ -218,14 +218,13 @@ function spawnAd() {
   const adImage = new Image();
   adImage.src = adImages[Math.floor(Math.random()*adImages.length)];
   adDiv.appendChild(adImage);
-  adDiv.onclick = () => window.open(adLink,"_blank");
   document.body.appendChild(adDiv);
   makeDraggable(adDiv);
 
   const buttonRect = addTimeButton.getBoundingClientRect();
   let spawnX, spawnY;
 
-  let spawnNearCursor = Math.random() < 0.1; // 10% chance
+  let spawnNearCursor = Math.random() < 0.1;
   let spawnNearButton = !spawnNearCursor && Math.random() < 0.5;
 
   if (spawnNearCursor) {
@@ -250,27 +249,50 @@ function spawnAd() {
 }
 
 function makeDraggable(element) {
-  let pos1=0,pos2=0,pos3=0,pos4=0,isDragging=false;
+  let pos1=0, pos2=0, pos3=0, pos4=0;
+  let isDragging = false;
+
   element.onmousedown = e => {
-    e.preventDefault(); pos3=e.clientX; pos4=e.clientY; isDragging=false;
+    e.preventDefault();
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    isDragging = false;
+
     document.onmouseup = e => {
-      document.onmouseup=null; document.onmousemove=null;
-      if (!isDragging) element.click();
-      else if(element.offsetLeft<20||element.offsetTop<20||element.offsetLeft+element.offsetWidth>window.innerWidth-20||element.offsetTop+element.offsetHeight>window.innerHeight-20) element.remove();
+      document.onmouseup = null;
+      document.onmousemove = null;
+
+      if (!isDragging) {
+        window.open(adLink, "_blank");
+      } else {
+        if(element.offsetLeft < 20 || element.offsetTop < 20 ||
+           element.offsetLeft + element.offsetWidth > window.innerWidth - 20 ||
+           element.offsetTop + element.offsetHeight > window.innerHeight - 20) {
+          element.remove();
+        }
+      }
     };
+
     document.onmousemove = e => {
-      e.preventDefault(); isDragging=true;
-      pos1=pos3-e.clientX; pos2=pos4-e.clientY; pos3=e.clientX; pos4=e.clientY;
-      element.style.top=(element.offsetTop-pos2)+"px";
-      element.style.left=(element.offsetLeft-pos1)+"px";
+      e.preventDefault();
+      isDragging = true;
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+
+      element.style.top = (element.offsetTop - pos2) + "px";
+      element.style.left = (element.offsetLeft - pos1) + "px";
     };
   };
+
+  element.ondragstart = e => e.preventDefault();
 }
 
 function endGame() {
   clearInterval(gameInterval); clearInterval(spawnInterval); clearInterval(scoreInterval);
   gameRunning=false;
-  finalScore.innerText = "Final Score: " + score; // ✅ freeze score
+  finalScore.innerText = "Final Score: " + score;
   gameOverScreen.classList.add("show");
 }
 
