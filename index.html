@@ -20,7 +20,7 @@ body {
 .ad {
   position: absolute;
   cursor: grab;
-  z-index: 15;
+  z-index: 10; /* ads appear above button */
   opacity: 0.95;
 }
 
@@ -40,27 +40,27 @@ body {
   cursor: pointer;
   border-radius: 10px;
   transition: background-color 0.3s, transform 0.1s;
-  z-index: 100; /* stay above ads */
 }
 
 #startButton:hover, #addTimeButton:hover { background-color: #0056b3; transform: scale(1.05); }
 
-#startButton { margin-top: 20px; }
-#addTimeButton { display: none; margin-top: 20px; }
+#startButton { margin-top: 20px; z-index: 50; }
 
-#titleScreen { font-size: 42px; font-weight: bold; margin-bottom: 10px; text-align: center; z-index: 100; }
-#newUpdateBanner { background-color: #ff4444; color: white; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 20px; animation: pulse 1.2s infinite; z-index: 100; }
+#addTimeButton { 
+  display: none;
+  position: absolute; /* ✅ placed at bottom */
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 0; /* ✅ always behind ads */
+}
+
+#titleScreen { font-size: 42px; font-weight: bold; margin-bottom: 10px; text-align: center; }
+#newUpdateBanner { background-color: #ff4444; color: white; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 20px; animation: pulse 1.2s infinite; }
 @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
-#instructions { font-size: 18px; margin-bottom: 20px; text-align: center; max-width: 500px; z-index: 100; }
-
-#lifeSupportImage {
-  width: 200px;
-  height: auto;
-  margin-bottom: 15px;
-  z-index: 100; /* keep above ads */
-  position: relative;
-}
+#instructions { font-size: 18px; margin-bottom: 20px; text-align: center; max-width: 500px; }
+#lifeSupportImage { width: 200px; height: auto; margin-bottom: 15px; position: relative; z-index: 100; }
 
 #timerContainer {
   position: absolute;
@@ -72,7 +72,7 @@ body {
   border-radius: 10px;
   overflow: hidden;
   display: none;
-  z-index: 100; /* keep above ads */
+  z-index: 100;
 }
 
 #timerBar {
@@ -88,16 +88,16 @@ body {
   left: 20px;
   font-size: 24px;
   font-weight: bold;
-  z-index: 100; /* keep above ads */
+  z-index: 100;
 }
 
-#highScoreCounter {
+#highScore {
   position: absolute;
-  top: 15px;
-  right: 20px;
-  font-size: 24px;
+  top: 50px;
+  left: 20px;
+  font-size: 20px;
   font-weight: bold;
-  z-index: 100; /* keep above ads */
+  z-index: 100;
 }
 
 #gameOverScreen {
@@ -110,9 +110,7 @@ body {
 #gameOverScreen.show { display: flex; opacity: 1; }
 
 #finalScore { font-size: 28px; margin-top: 15px; }
-#bestScore { font-size: 24px; margin-top: 10px; }
-
-#restartButton { margin-top: 20px; padding: 15px 25px; font-size: 20px; background-color: #ff4444; border: none; border-radius: 8px; color: white; cursor: pointer; transition: background-color 0.3s; z-index: 100; }
+#restartButton { margin-top: 20px; padding: 15px 25px; font-size: 20px; background-color: #ff4444; border: none; border-radius: 8px; color: white; cursor: pointer; transition: background-color 0.3s; }
 #restartButton:hover { background-color: #cc0000; }
 
 .disabled { background-color: #bbb; cursor: not-allowed; }
@@ -120,7 +118,7 @@ body {
 </head>
 <body>
 
-<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 v1.48</div>
+<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 v1.50</div>
 <div id="titleScreen">Grampa's Life Support Simulator 2000!</div>
 <div id="instructions">Attempt to kill grandpa by pressing the blue button before the timer runs out!<br>But beware of the annoying ads that try to block you...</div>
 <img id="lifeSupportImage" src="image1.png" alt="Life Support Image">
@@ -129,12 +127,11 @@ body {
 
 <div id="timerContainer"><div id="timerBar"></div></div>
 <div id="scoreCounter">Score: 0</div>
-<div id="highScoreCounter">High Score: 0</div>
+<div id="highScore">High Score: 0</div>
 
 <div id="gameOverScreen">
   <div id="gameOverText">Game Over!</div>
   <div id="finalScore">Final Score: 0</div>
-  <div id="bestScore">Best Score: 0</div>
   <button id="restartButton">Restart</button>
 </div>
 
@@ -146,7 +143,7 @@ let adsSpawned = 0;
 let adInterval = 800; 
 let timer = 10;
 let score = 0;
-let highScore = localStorage.getItem("highScore") ? parseInt(localStorage.getItem("highScore")) : 0;
+let highScore = localStorage.getItem("highScore") || 0;
 let gameInterval;
 let spawnInterval;
 let scoreInterval;
@@ -159,7 +156,7 @@ document.onmousemove = e => { mouseX = e.clientX; mouseY = e.clientY; };
 const timerContainer = document.getElementById("timerContainer");
 const timerBar = document.getElementById("timerBar");
 const scoreCounter = document.getElementById("scoreCounter");
-const highScoreCounter = document.getElementById("highScoreCounter");
+const highScoreDisplay = document.getElementById("highScore");
 const startButton = document.getElementById("startButton");
 const addTimeButton = document.getElementById("addTimeButton");
 const titleScreen = document.getElementById("titleScreen");
@@ -169,9 +166,8 @@ const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
 const newUpdateBanner = document.getElementById("newUpdateBanner");
 const finalScore = document.getElementById("finalScore");
-const bestScore = document.getElementById("bestScore");
 
-updateHighScoreDisplay();
+highScoreDisplay.innerText = "High Score: " + highScore;
 
 startButton.onclick = () => {
   startButton.style.display = "none";
@@ -181,7 +177,7 @@ startButton.onclick = () => {
   timerContainer.style.display = "block";
   newUpdateBanner.style.display = "none";
   scoreCounter.style.display = "block";
-  highScoreCounter.style.display = "block";
+  highScoreDisplay.style.display = "block";
   timer = 10; score = 0;
   updateTimerBar(); updateScore();
   startTimer(); startScore();
@@ -235,7 +231,6 @@ function updateTimerBar() {
 }
 
 function updateScore() { scoreCounter.innerText = "Score: " + score; }
-function updateHighScoreDisplay() { highScoreCounter.innerText = "High Score: " + highScore; }
 
 function spawnAd() {
   adsSpawned++;
@@ -278,44 +273,31 @@ function makeDraggable(element) {
   let pos1=0, pos2=0, pos3=0, pos4=0;
   let isDragging = false;
 
-  // Mouse support
-  element.onmousedown = e => {
+  function dragStart(e) {
     e.preventDefault();
-    startDrag(e.clientX, e.clientY);
-    document.onmousemove = e => drag(e.clientX, e.clientY);
-    document.onmouseup = endDrag;
-  };
-
-  // Touch support
-  element.ontouchstart = e => {
-    let touch = e.touches[0];
-    startDrag(touch.clientX, touch.clientY);
-    document.ontouchmove = e => {
-      let touch = e.touches[0];
-      drag(touch.clientX, touch.clientY);
-    };
-    document.ontouchend = endDrag;
-  };
-
-  element.ondragstart = e => e.preventDefault();
-
-  function startDrag(x, y) {
-    pos3 = x;
-    pos4 = y;
+    pos3 = e.clientX || e.touches[0].clientX;
+    pos4 = e.clientY || e.touches[0].clientY;
     isDragging = false;
+    document.onmouseup = closeDrag;
+    document.onmousemove = dragElement;
+    document.ontouchend = closeDrag;
+    document.ontouchmove = dragElement;
   }
 
-  function drag(x, y) {
+  function dragElement(e) {
+    e.preventDefault();
     isDragging = true;
-    pos1 = pos3 - x;
-    pos2 = pos4 - y;
-    pos3 = x;
-    pos4 = y;
+    let clientX = e.clientX || e.touches[0].clientX;
+    let clientY = e.clientY || e.touches[0].clientY;
+    pos1 = pos3 - clientX;
+    pos2 = pos4 - clientY;
+    pos3 = clientX;
+    pos4 = clientY;
     element.style.top = (element.offsetTop - pos2) + "px";
     element.style.left = (element.offsetLeft - pos1) + "px";
   }
 
-  function endDrag() {
+  function closeDrag(e) {
     document.onmouseup = null;
     document.onmousemove = null;
     document.ontouchend = null;
@@ -331,20 +313,21 @@ function makeDraggable(element) {
       }
     }
   }
+
+  element.onmousedown = dragStart;
+  element.ontouchstart = dragStart;
+  element.ondragstart = e => e.preventDefault();
 }
 
 function endGame() {
   clearInterval(gameInterval); clearInterval(spawnInterval); clearInterval(scoreInterval);
   gameRunning=false;
-
+  finalScore.innerText = "Final Score: " + score;
   if (score > highScore) {
     highScore = score;
     localStorage.setItem("highScore", highScore);
   }
-
-  finalScore.innerText = "Final Score: " + score;
-  bestScore.innerText = "Best Score: " + highScore;
-  updateHighScoreDisplay();
+  highScoreDisplay.innerText = "High Score: " + highScore;
   gameOverScreen.classList.add("show");
 }
 
