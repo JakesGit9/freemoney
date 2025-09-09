@@ -40,7 +40,7 @@ body {
   cursor: pointer;
   border-radius: 10px;
   transition: background-color 0.3s, transform 0.1s;
-  z-index: 10;
+  z-index: 100; /* stay above ads */
 }
 
 #startButton:hover, #addTimeButton:hover { background-color: #0056b3; transform: scale(1.05); }
@@ -48,12 +48,19 @@ body {
 #startButton { margin-top: 20px; }
 #addTimeButton { display: none; margin-top: 20px; }
 
-#titleScreen { font-size: 42px; font-weight: bold; margin-bottom: 10px; text-align: center; }
-#newUpdateBanner { background-color: #ff4444; color: white; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 20px; animation: pulse 1.2s infinite; }
+#titleScreen { font-size: 42px; font-weight: bold; margin-bottom: 10px; text-align: center; z-index: 100; }
+#newUpdateBanner { background-color: #ff4444; color: white; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 20px; animation: pulse 1.2s infinite; z-index: 100; }
 @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
-#instructions { font-size: 18px; margin-bottom: 20px; text-align: center; max-width: 500px; }
-#lifeSupportImage { width: 200px; height: auto; margin-bottom: 15px; }
+#instructions { font-size: 18px; margin-bottom: 20px; text-align: center; max-width: 500px; z-index: 100; }
+
+#lifeSupportImage {
+  width: 200px;
+  height: auto;
+  margin-bottom: 15px;
+  z-index: 100; /* keep above ads */
+  position: relative;
+}
 
 #timerContainer {
   position: absolute;
@@ -65,7 +72,7 @@ body {
   border-radius: 10px;
   overflow: hidden;
   display: none;
-  z-index: 5;
+  z-index: 100; /* keep above ads */
 }
 
 #timerBar {
@@ -81,7 +88,7 @@ body {
   left: 20px;
   font-size: 24px;
   font-weight: bold;
-  z-index: 6;
+  z-index: 100; /* keep above ads */
 }
 
 #highScoreCounter {
@@ -90,14 +97,14 @@ body {
   right: 20px;
   font-size: 24px;
   font-weight: bold;
-  z-index: 6;
+  z-index: 100; /* keep above ads */
 }
 
 #gameOverScreen {
   display: none;
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   background-color: rgba(0,0,0,0.8); color: white; font-size: 40px; font-weight: bold;
-  flex-direction: column; justify-content: center; align-items: center; z-index: 20; opacity: 0; transition: opacity 0.8s;
+  flex-direction: column; justify-content: center; align-items: center; z-index: 200; opacity: 0; transition: opacity 0.8s;
 }
 
 #gameOverScreen.show { display: flex; opacity: 1; }
@@ -105,7 +112,7 @@ body {
 #finalScore { font-size: 28px; margin-top: 15px; }
 #bestScore { font-size: 24px; margin-top: 10px; }
 
-#restartButton { margin-top: 20px; padding: 15px 25px; font-size: 20px; background-color: #ff4444; border: none; border-radius: 8px; color: white; cursor: pointer; transition: background-color 0.3s; }
+#restartButton { margin-top: 20px; padding: 15px 25px; font-size: 20px; background-color: #ff4444; border: none; border-radius: 8px; color: white; cursor: pointer; transition: background-color 0.3s; z-index: 100; }
 #restartButton:hover { background-color: #cc0000; }
 
 .disabled { background-color: #bbb; cursor: not-allowed; }
@@ -271,48 +278,65 @@ function makeDraggable(element) {
   let pos1=0, pos2=0, pos3=0, pos4=0;
   let isDragging = false;
 
+  // Mouse support
   element.onmousedown = e => {
     e.preventDefault();
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    isDragging = false;
+    startDrag(e.clientX, e.clientY);
+    document.onmousemove = e => drag(e.clientX, e.clientY);
+    document.onmouseup = endDrag;
+  };
 
-    document.onmouseup = e => {
-      document.onmouseup = null;
-      document.onmousemove = null;
-
-      if (!isDragging) {
-        window.open(adLink, "_blank");
-      } else {
-        if(element.offsetLeft < 20 || element.offsetTop < 20 ||
-           element.offsetLeft + element.offsetWidth > window.innerWidth - 20 ||
-           element.offsetTop + element.offsetHeight > window.innerHeight - 20) {
-          element.remove();
-        }
-      }
+  // Touch support
+  element.ontouchstart = e => {
+    let touch = e.touches[0];
+    startDrag(touch.clientX, touch.clientY);
+    document.ontouchmove = e => {
+      let touch = e.touches[0];
+      drag(touch.clientX, touch.clientY);
     };
-
-    document.onmousemove = e => {
-      e.preventDefault();
-      isDragging = true;
-      pos1 = pos3 - e.clientX;
-      pos2 = pos4 - e.clientY;
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-
-      element.style.top = (element.offsetTop - pos2) + "px";
-      element.style.left = (element.offsetLeft - pos1) + "px";
-    };
+    document.ontouchend = endDrag;
   };
 
   element.ondragstart = e => e.preventDefault();
+
+  function startDrag(x, y) {
+    pos3 = x;
+    pos4 = y;
+    isDragging = false;
+  }
+
+  function drag(x, y) {
+    isDragging = true;
+    pos1 = pos3 - x;
+    pos2 = pos4 - y;
+    pos3 = x;
+    pos4 = y;
+    element.style.top = (element.offsetTop - pos2) + "px";
+    element.style.left = (element.offsetLeft - pos1) + "px";
+  }
+
+  function endDrag() {
+    document.onmouseup = null;
+    document.onmousemove = null;
+    document.ontouchend = null;
+    document.ontouchmove = null;
+
+    if (!isDragging) {
+      window.open(adLink, "_blank");
+    } else {
+      if(element.offsetLeft < 20 || element.offsetTop < 20 ||
+         element.offsetLeft + element.offsetWidth > window.innerWidth - 20 ||
+         element.offsetTop + element.offsetHeight > window.innerHeight - 20) {
+        element.remove();
+      }
+    }
+  }
 }
 
 function endGame() {
   clearInterval(gameInterval); clearInterval(spawnInterval); clearInterval(scoreInterval);
   gameRunning=false;
 
-  // update high score
   if (score > highScore) {
     highScore = score;
     localStorage.setItem("highScore", highScore);
