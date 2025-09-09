@@ -43,14 +43,11 @@ body {
   transition: background-color 0.3s, transform 0.12s;
 }
 
-/* start button hover — scale only (no translate) */
 #startButton:hover {
   background-color: #0056b3;
   transform: scale(1.05);
 }
 
-/* addTime button is absolutely positioned and centered at bottom.
-   Keep its translateX(-50%) present on hover by including it in the hover transform. */
 #addTimeButton {
   display: none;
   position: absolute;
@@ -64,7 +61,6 @@ body {
   transform: translateX(-50%) scale(1.05);
 }
 
-/* layout / banners / text */
 #startButton { margin-top: 20px; z-index: 50; }
 #titleScreen { font-size: 42px; font-weight: bold; margin-bottom: 10px; text-align: center; }
 #newUpdateBanner { background-color: #ff4444; color: white; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 20px; animation: pulse 1.2s infinite; z-index: 50; }
@@ -72,7 +68,7 @@ body {
 
 #instructions { font-size: 18px; margin-bottom: 20px; text-align: center; max-width: 500px; z-index: 50; }
 
-/* HUD (must stay on top) */
+/* HUD (always on top) */
 #lifeSupportImage { width: 200px; height: auto; margin-bottom: 15px; position: relative; z-index: 100; }
 #timerContainer {
   position: absolute;
@@ -123,7 +119,7 @@ body {
 </head>
 <body>
 
-<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 v1.50</div>
+<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 v1.51</div>
 <div id="titleScreen">Grampa's Life Support Simulator 2000!</div>
 <div id="instructions">Attempt to kill grandpa by pressing the blue button before the timer runs out!<br>But beware of the annoying ads that try to block you...</div>
 
@@ -279,14 +275,21 @@ function makeDraggable(element) {
   let pos1=0, pos2=0, pos3=0, pos4=0;
   let isDragging = false;
 
+  function getClientPos(e) {
+    if (e.touches) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    } else {
+      return { x: e.clientX, y: e.clientY };
+    }
+  }
+
   function dragStart(e) {
     e.preventDefault();
-    // unify mouse/touch
-    const clientX = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
-    const clientY = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
-    pos3 = clientX;
-    pos4 = clientY;
+    const pos = getClientPos(e);
+    pos3 = pos.x;
+    pos4 = pos.y;
     isDragging = false;
+
     document.onmouseup = closeDrag;
     document.onmousemove = dragElement;
     document.ontouchend = closeDrag;
@@ -296,12 +299,12 @@ function makeDraggable(element) {
   function dragElement(e) {
     e.preventDefault();
     isDragging = true;
-    const clientX = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
-    const clientY = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
-    pos1 = pos3 - clientX;
-    pos2 = pos4 - clientY;
-    pos3 = clientX;
-    pos4 = clientY;
+    const pos = getClientPos(e);
+    pos1 = pos3 - pos.x;
+    pos2 = pos4 - pos.y;
+    pos3 = pos.x;
+    pos4 = pos.y;
+
     element.style.top = (element.offsetTop - pos2) + "px";
     element.style.left = (element.offsetLeft - pos1) + "px";
   }
@@ -315,10 +318,12 @@ function makeDraggable(element) {
     if (!isDragging) {
       window.open(adLink, "_blank");
     } else {
-      // remove if dragged off-screen
-      if(element.offsetLeft < 20 || element.offsetTop < 20 ||
-         element.offsetLeft + element.offsetWidth > window.innerWidth - 20 ||
-         element.offsetTop + element.offsetHeight > window.innerHeight - 20) {
+      if (
+        element.offsetLeft < 20 ||
+        element.offsetTop < 20 ||
+        element.offsetLeft + element.offsetWidth > window.innerWidth - 20 ||
+        element.offsetTop + element.offsetHeight > window.innerHeight - 20
+      ) {
         element.remove();
       }
     }
