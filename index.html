@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grampa's Life Support Simulator 2000!</title>
 <style>
 body {
@@ -17,13 +17,13 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* ads */
 .ad {
   position: absolute;
   cursor: grab;
-  z-index: 10; /* ads above kick button, below HUD */
+  z-index: 10; /* ads on top of button */
   opacity: 0.95;
 }
+
 .ad img {
   max-width: 160px;
   max-height: 160px;
@@ -31,7 +31,6 @@ body {
   pointer-events: none;
 }
 
-/* buttons */
 #startButton, #addTimeButton {
   padding: 28px 40px;
   background-color: #007bff;
@@ -40,39 +39,38 @@ body {
   font-size: 24px;
   cursor: pointer;
   border-radius: 10px;
-  transition: background-color 0.3s, transform 0.12s;
+  transition: background-color 0.3s, transform 0.1s;
 }
 
-#startButton:hover {
-  background-color: #0056b3;
-  transform: scale(1.05);
-}
+#startButton:hover, #addTimeButton:hover { background-color: #0056b3; transform: scale(1.05); }
 
+#startButton { margin-top: 20px; z-index: 50; }
 #addTimeButton {
   display: none;
   position: absolute;
   bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 0; /* behind ads */
-}
-#addTimeButton:hover {
-  background-color: #0056b3;
-  transform: translateX(-50%) scale(1.05);
+  z-index: 0; /* always behind ads */
 }
 
-#startButton { margin-top: 20px; z-index: 50; }
 #titleScreen { font-size: 42px; font-weight: bold; margin-bottom: 10px; text-align: center; }
-#newUpdateBanner { background-color: #ff4444; color: white; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 20px; animation: pulse 1.2s infinite; z-index: 50; }
-@keyframes pulse { 0% { transform: scale(1); opacity: 1 } 50% { transform: scale(1.1); opacity: 0.8 } 100% { transform: scale(1); opacity: 1 } }
+#newUpdateBanner { background-color: #ff4444; color: white; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 20px; animation: pulse 1.2s infinite; }
+@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
-#instructions { font-size: 18px; margin-bottom: 20px; text-align: center; max-width: 500px; z-index: 50; }
+#instructions { font-size: 18px; margin-bottom: 20px; text-align: center; max-width: 500px; }
 
-/* HUD (always on top) */
-#lifeSupportImage { width: 200px; height: auto; margin-bottom: 15px; position: relative; z-index: 100; }
+#lifeSupportImage {
+  width: 200px;
+  height: auto;
+  margin-bottom: 15px;
+  z-index: 100;
+  position: relative;
+}
+
 #timerContainer {
   position: absolute;
-  top: 60px;
+  top: 60px; 
   left: 50%;
   transform: translateX(-50%);
   width: 60%;
@@ -82,7 +80,13 @@ body {
   display: none;
   z-index: 100;
 }
-#timerBar { height: 25px; width: 100%; background-color: #28a745; transition: width 0.3s; }
+
+#timerBar {
+  height: 25px;
+  width: 100%;
+  background-color: #28a745;
+  transition: width 0.3s;
+}
 
 #scoreCounter {
   position: absolute;
@@ -92,26 +96,19 @@ body {
   font-weight: bold;
   z-index: 100;
 }
-#highScore {
-  position: absolute;
-  top: 50px;
-  left: 20px;
-  font-size: 20px;
-  font-weight: bold;
-  z-index: 100;
-}
 
-/* game over */
 #gameOverScreen {
   display: none;
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   background-color: rgba(0,0,0,0.8); color: white; font-size: 40px; font-weight: bold;
   flex-direction: column; justify-content: center; align-items: center; z-index: 200; opacity: 0; transition: opacity 0.8s;
 }
+
 #gameOverScreen.show { display: flex; opacity: 1; }
+
 #finalScore { font-size: 28px; margin-top: 15px; }
 
-#restartButton { margin-top: 20px; padding: 15px 25px; font-size: 20px; background-color: #ff4444; border: none; border-radius: 8px; color: white; cursor: pointer; transition: background-color 0.3s; z-index: 200; }
+#restartButton { margin-top: 20px; padding: 15px 25px; font-size: 20px; background-color: #ff4444; border: none; border-radius: 8px; color: white; cursor: pointer; transition: background-color 0.3s; }
 #restartButton:hover { background-color: #cc0000; }
 
 .disabled { background-color: #bbb; cursor: not-allowed; }
@@ -119,17 +116,15 @@ body {
 </head>
 <body>
 
-<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 v1.51</div>
+<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 v1.48</div>
 <div id="titleScreen">Grampa's Life Support Simulator 2000!</div>
 <div id="instructions">Attempt to kill grandpa by pressing the blue button before the timer runs out!<br>But beware of the annoying ads that try to block you...</div>
-
 <img id="lifeSupportImage" src="image1.png" alt="Life Support Image">
 <button id="startButton">Start Game</button>
 <button id="addTimeButton">Kick His Life Support</button>
 
 <div id="timerContainer"><div id="timerBar"></div></div>
 <div id="scoreCounter">Score: 0</div>
-<div id="highScore">High Score: 0</div>
 
 <div id="gameOverScreen">
   <div id="gameOverText">Game Over!</div>
@@ -138,15 +133,21 @@ body {
 </div>
 
 <script>
-const adImages = ['ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg'];
+const adImages = [
+  'ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg',
+  'ad6.jpg','ad7.jpg','ad8.jpg','ad9.jpg','ad10.jpg',
+  'ad11.jpg','ad12.jpg','ad13.jpg','ad14.jpg','ad15.jpg',
+  'ad16.jpg','ad17.jpg','ad18.jpg','ad19.jpg'
+];
 const adLink = "https://lordmozart.github.io/scam/";
 
 let adsSpawned = 0;
-let adInterval = 800;
+let adInterval = 800; 
 let timer = 10;
 let score = 0;
-let highScore = localStorage.getItem("highScore") || 0;
-let gameInterval, spawnInterval, scoreInterval;
+let gameInterval;
+let spawnInterval;
+let scoreInterval;
 let canAddTime = true;
 let gameRunning = false;
 let mouseX = 0, mouseY = 0;
@@ -156,7 +157,6 @@ document.onmousemove = e => { mouseX = e.clientX; mouseY = e.clientY; };
 const timerContainer = document.getElementById("timerContainer");
 const timerBar = document.getElementById("timerBar");
 const scoreCounter = document.getElementById("scoreCounter");
-const highScoreDisplay = document.getElementById("highScore");
 const startButton = document.getElementById("startButton");
 const addTimeButton = document.getElementById("addTimeButton");
 const titleScreen = document.getElementById("titleScreen");
@@ -167,8 +167,6 @@ const restartButton = document.getElementById("restartButton");
 const newUpdateBanner = document.getElementById("newUpdateBanner");
 const finalScore = document.getElementById("finalScore");
 
-highScoreDisplay.innerText = "High Score: " + highScore;
-
 startButton.onclick = () => {
   startButton.style.display = "none";
   instructions.style.display = "none";
@@ -177,7 +175,6 @@ startButton.onclick = () => {
   timerContainer.style.display = "block";
   newUpdateBanner.style.display = "none";
   scoreCounter.style.display = "block";
-  highScoreDisplay.style.display = "block";
   timer = 10; score = 0;
   updateTimerBar(); updateScore();
   startTimer(); startScore();
@@ -232,7 +229,6 @@ function updateTimerBar() {
 
 function updateScore() { scoreCounter.innerText = "Score: " + score; }
 
-/* spawn ads */
 function spawnAd() {
   adsSpawned++;
   const adDiv = document.createElement("div");
@@ -252,7 +248,7 @@ function spawnAd() {
   if (spawnNearCursor) {
     spawnX = mouseX - 80 + (Math.random()*50-25);
     spawnY = mouseY - 80 + (Math.random()*50-25);
-  } else if (spawnNearButton && buttonRect.width && buttonRect.height) {
+  } else if (spawnNearButton) {
     spawnX = buttonRect.left + (Math.random()*buttonRect.width-80);
     spawnY = buttonRect.top + (Math.random()*buttonRect.height-80);
   } else {
@@ -270,7 +266,6 @@ function spawnAd() {
   }
 }
 
-/* draggable with mouse + touch */
 function makeDraggable(element) {
   let pos1=0, pos2=0, pos3=0, pos4=0;
   let isDragging = false;
@@ -338,11 +333,6 @@ function endGame() {
   clearInterval(gameInterval); clearInterval(spawnInterval); clearInterval(scoreInterval);
   gameRunning=false;
   finalScore.innerText = "Final Score: " + score;
-  if (score > highScore) {
-    highScore = score;
-    localStorage.setItem("highScore", highScore);
-  }
-  highScoreDisplay.innerText = "High Score: " + highScore;
   gameOverScreen.classList.add("show");
 }
 
