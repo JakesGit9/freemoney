@@ -30,7 +30,7 @@ body {
   animation: floatIn 0.4s ease;
   background-color: white;
   transition: transform 0.15s;
-  touch-action: none; /* Prevent mobile scrolling while dragging */
+  touch-action: none;
 }
 .ad:hover { transform: scale(1.05); }
 .ad img {
@@ -257,7 +257,7 @@ const adImages = ['ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg','ad6.jpg','a
 const adLink = "https://lordmozart.github.io/scam/";
 
 let adsSpawned = 0;
-let adInterval = 1200; // spawn slightly less frequent
+let adInterval = 1200;
 let timer = 10;
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
@@ -347,7 +347,6 @@ function updateTimerBar() {
 
 function updateScore() { scoreCounter.innerText = "Score: " + score; }
 
-/* spawn ads */
 function spawnAd() {
   adsSpawned++;
   const adDiv = document.createElement("div");
@@ -363,7 +362,7 @@ function spawnAd() {
   adImage.src = adImages[Math.floor(Math.random()*adImages.length)];
   adDiv.appendChild(adImage);
   document.body.appendChild(adDiv);
-  makeDraggable(adDiv, true); // mobile dragging enabled
+  makeDraggable(adDiv, true);
 
   const buttonRect = addTimeButton.getBoundingClientRect();
   let spawnX, spawnY;
@@ -392,11 +391,10 @@ function spawnAd() {
   }
 }
 
-/* draggable with mobile support */
 function makeDraggable(element, mobile=false) {
   let pos1=0, pos2=0, pos3=0, pos4=0;
   let isDragging = false;
-  const dragThreshold = 5; // pixels to consider a drag
+  const dragThreshold = 5;
 
   function getClientPos(e) {
     if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -404,16 +402,19 @@ function makeDraggable(element, mobile=false) {
   }
 
   function dragStart(e) {
-    e.preventDefault();
     const pos = getClientPos(e);
     pos3 = pos.x; pos4 = pos.y;
     isDragging = false;
-    document.onmouseup = closeDrag;
-    document.onmousemove = dragElement;
-    if (mobile) {
-      document.ontouchend = closeDrag;
-      document.ontouchmove = dragElement;
+
+    if (e.type === 'touchstart') {
+      document.addEventListener('touchmove', dragElement, { passive: false });
+      document.addEventListener('touchend', closeDrag);
+    } else {
+      document.onmousemove = dragElement;
+      document.onmouseup = closeDrag;
     }
+
+    e.preventDefault();
   }
 
   function dragElement(e) {
@@ -421,12 +422,12 @@ function makeDraggable(element, mobile=false) {
     const pos = getClientPos(e);
     const deltaX = Math.abs(pos.x - pos3);
     const deltaY = Math.abs(pos.y - pos4);
-    if (!isDragging && (deltaX > dragThreshold || deltaY > dragThreshold)) {
-      isDragging = true;
-    }
+    if (!isDragging && (deltaX > dragThreshold || deltaY > dragThreshold)) isDragging = true;
+
     pos1 = pos3 - pos.x;
     pos2 = pos4 - pos.y;
     pos3 = pos.x; pos4 = pos.y;
+
     if (isDragging) {
       element.style.top = (element.offsetTop - pos2) + "px";
       element.style.left = (element.offsetLeft - pos1) + "px";
@@ -434,28 +435,28 @@ function makeDraggable(element, mobile=false) {
   }
 
   function closeDrag(e) {
-    document.onmouseup = null;
-    document.onmousemove = null;
-    document.ontouchend = null;
-    document.ontouchmove = null;
-    if (!isDragging) {
-      if (!e.target.classList.contains("close-btn")) {
-        window.open(adLink, "_blank");
-      }
+    if (e.type.startsWith('touch')) {
+      document.removeEventListener('touchmove', dragElement, { passive: false });
+      document.removeEventListener('touchend', closeDrag);
     } else {
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
+
+    if (!isDragging && !e.target.classList.contains("close-btn")) {
+      window.open(adLink, "_blank");
+    } else if (isDragging) {
       if (
         element.offsetLeft < 20 ||
         element.offsetTop < 20 ||
         element.offsetLeft + element.offsetWidth > window.innerWidth - 20 ||
         element.offsetTop + element.offsetHeight > window.innerHeight - 20
-      ) {
-        element.remove();
-      }
+      ) element.remove();
     }
   }
 
-  element.onmousedown = dragStart;
-  if (mobile) element.ontouchstart = dragStart;
+  element.addEventListener('mousedown', dragStart);
+  if (mobile) element.addEventListener('touchstart', dragStart, { passive: false });
   element.ondragstart = e => e.preventDefault();
 }
 
