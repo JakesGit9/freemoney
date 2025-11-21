@@ -88,22 +88,25 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 0;
-  transition: transform 0.3s, background 0.3s;
+  transition: transform 0.2s, background 0.2s;
 }
+
 #addTimeButton:hover:not(.disabled) {
   transform: translateX(-50%) scale(1.08);
 }
+
 #addTimeButton:active:not(.disabled) {
   transform: translateX(-50%) scale(0.95);
 }
+
 #addTimeButton.disabled {
   background: gray !important;
   cursor: not-allowed;
-  transform: translateX(-50%) scale(1);
+  transform: translateX(-50%) scale(1) !important;
 }
+
 #addTimeButton.disabled:hover {
-  transform: translateX(-50%) scale(1);
-  cursor: not-allowed;
+  transform: translateX(-50%) scale(1) !important;
 }
 
 #startButton { margin-top: 20px; z-index: 50; }
