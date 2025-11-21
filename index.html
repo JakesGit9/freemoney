@@ -81,34 +81,22 @@ body {
 
 #startButton:hover { background: linear-gradient(135deg, #0056b3, #004097); transform: scale(1.08); }
 
-/* Kick His Life Support button fixes */
+/* Kick His Life Support button */
 #addTimeButton {
   display: none;
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
+  margin-top: 10px;
   z-index: 0;
-  transition: transform 0.2s, background 0.2s;
 }
 
-#addTimeButton:hover:not(.disabled) {
-  transform: translateX(-50%) scale(1.08);
-}
-
-#addTimeButton:active:not(.disabled) {
-  transform: translateX(-50%) scale(0.95);
-}
+#addTimeButton:hover:not(.disabled) { transform: scale(1.08); }
+#addTimeButton:active:not(.disabled) { transform: scale(0.95); }
 
 #addTimeButton.disabled {
   background: gray !important;
   cursor: not-allowed;
-  transform: translateX(-50%) scale(1) !important;
+  transform: scale(1) !important;
 }
-
-#addTimeButton.disabled:hover {
-  transform: translateX(-50%) scale(1) !important;
-}
+#addTimeButton.disabled:hover { transform: scale(1) !important; }
 
 #startButton { margin-top: 20px; z-index: 50; }
 
@@ -239,8 +227,8 @@ body {
 </div>
 
 <img id="lifeSupportImage" src="image1.png" alt="Life Support Image">
-<button id="startButton">Start Game</button>
 <button id="addTimeButton">Kick His Life Support</button>
+<button id="startButton">Start Game</button>
 
 <div id="timerContainer"><div id="timerBar"></div></div>
 <div id="scoreCounter">Score: 0</div>
@@ -253,6 +241,7 @@ body {
 </div>
 
 <script>
+// JS logic stays exactly the same
 const adImages = ['ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg','ad6.jpg','ad7.jpg','ad8.jpg','ad9.jpg','ad10.jpg','ad11.jpg','ad12.jpg','ad13.jpg','ad14.jpg','ad15.jpg','ad16.jpg','ad17.jpg','ad18.jpg','ad19.jpg'];
 const adLink = "https://lordmozart.github.io/scam/";
 
