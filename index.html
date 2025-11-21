@@ -53,12 +53,22 @@ body {
   position: absolute;
   bottom: 40px;
   left: 50%;
+  /* keep it centered via translateX; set transform-origin to center so scaling doesn't change the translate reference unexpectedly */
   transform: translateX(-50%);
+  transform-origin: center center;
   z-index: 0; /* behind ads */
 }
+/* hover will scale while preserving the translate; transform-origin prevents odd shifts */
 #addTimeButton:hover {
   background-color: #0056b3;
   transform: translateX(-50%) scale(1.05);
+}
+
+/* when disabled, don't apply the hover scale (prevents flicker/shift while disabled) */
+#addTimeButton.disabled:hover {
+  transform: translateX(-50%);
+  background-color: #bbb;
+  cursor: not-allowed;
 }
 
 #startButton { margin-top: 20px; z-index: 50; }
