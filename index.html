@@ -4,155 +4,485 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Grampa's Life Support Simulator 2000!</title>
-
 <style>
 body {
   margin: 0;
   height: 100vh;
   overflow: hidden;
-  background-color: #f0f0f0;
-  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at top, #cfd8dc, #90a4ae);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-family: 'Comic Sans MS', Arial, sans-serif;
+  user-select: none;
 }
 
-/* Background Animation */
-@keyframes backgroundMove {
-  0% { background-position: 0 0; }
-  100% { background-position: 600px 0; }
-}
-
-.background {
+/* ads */
+.ad {
   position: absolute;
-  width: 200%;
-  height: 100%;
-  background-size: cover;
-  background-repeat: repeat-x;
-  animation: backgroundMove 10s linear infinite;
-}
-
-/* Grampa */
-#grampa {
-  position: absolute;
-  width: 250px;
-  transition: opacity 0.5s;
-  left: calc(50% - 125px);
-}
-
-/* Overlays */
-.milk-overlay, .grandma-overlay {
-  display: none;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  object-fit: cover;
-  pointer-events: none;
+  cursor: grab;
   z-index: 10;
+  opacity: 0.97;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  animation: floatIn 0.4s ease;
+  background-color: white;
+  transition: transform 0.15s;
+}
+.ad:hover {
+  transform: scale(1.05);
+}
+.ad img {
+  display: block;
+  max-width: 160px;
+  max-height: 160px;
+  border-radius: 8px;
+  user-select: none;
+  pointer-events: none;
+}
+.ad .close-btn {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  font-weight: bold;
+  font-family: sans-serif;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 18px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 15;
+  transition: background-color 0.2s, transform 0.15s;
+}
+.ad .close-btn:hover {
+  background: red;
+  transform: scale(1.2);
 }
 
-#kickBtn {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 14px 32px;
-  font-size: 18px;
+@keyframes floatIn {
+  0% { transform: scale(0.6) rotate(-5deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* buttons */
+#startButton, #addTimeButton {
+  padding: 28px 40px;
   background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
   border: none;
-  border-radius: 12px;
+  font-size: 24px;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
+  border-radius: 14px;
+  transition: all 0.3s;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.3);
 }
 
-/* FIXED BUTTON ANIMATION — stays centered */
-#kickBtn:not(.disabled):hover {
-  transform: translateX(-50%) scale(1.08);
+#startButton:hover, #addTimeButton:hover {
   background: linear-gradient(135deg, #0056b3, #004097);
+  transform: scale(1.08);
 }
 
-#kickBtn:not(.disabled):active {
+#addTimeButton {
+  display: none;
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 0;
+}
+#addTimeButton:active {
   transform: translateX(-50%) scale(0.95);
 }
 
-/* Disabled state that does NOT move */
+#startButton { margin-top: 20px; z-index: 50; }
+
+#titleScreen {
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 10px;
+  text-align: center;
+  text-shadow: 2px 2px 8px #00000055;
+  color: #222;
+}
+
+#newUpdateBanner {
+  background: linear-gradient(90deg, #ff4444, #ff7777);
+  color: white;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  font-size: 22px;
+  animation: pulse 1.2s infinite;
+  z-index: 50;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1 }
+  50% { transform: scale(1.1); opacity: 0.85 }
+  100% { transform: scale(1); opacity: 1 }
+}
+
+#instructions {
+  font-size: 19px;
+  margin-bottom: 20px;
+  text-align: center;
+  max-width: 500px;
+  z-index: 50;
+  color: #333;
+}
+
+/* HUD */
+#lifeSupportImage {
+  width: 220px;
+  height: auto;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+#lifeSupportImage:active {
+  transform: rotate(-5deg) scale(0.97);
+}
+
+#timerContainer {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  background-color: #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+  display: none;
+  z-index: 100;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+}
+#timerBar {
+  height: 25px;
+  width: 100%;
+  background: linear-gradient(90deg, #28a745, #218838);
+  transition: width 0.3s, background-color 0.3s;
+}
+
+#scoreCounter, #highScore {
+  position: absolute;
+  left: 20px;
+  font-weight: bold;
+  color: #222;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.4);
+}
+#scoreCounter {
+  top: 15px;
+  font-size: 24px;
+}
+#highScore {
+  top: 50px;
+  font-size: 20px;
+}
+
+/* game over */
+#gameOverScreen {
+  display: none;
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  color: white;
+  font-size: 42px;
+  font-weight: bold;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.8s;
+  text-align: center;
+}
+#gameOverScreen.show { display: flex; opacity: 1; }
+#finalScore { font-size: 28px; margin-top: 15px; }
+
+#restartButton {
+  margin-top: 25px;
+  padding: 16px 30px;
+  font-size: 22px;
+  background: linear-gradient(90deg, #ff4444, #cc0000);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+}
+#restartButton:hover {
+  background: linear-gradient(90deg, #cc0000, #990000);
+  transform: scale(1.05);
+}
+
 .disabled {
   background: gray !important;
   cursor: not-allowed;
-  opacity: 0.7 !important;
-  pointer-events: none;
-
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%) !important; /* keeps center */
-}
-
-/* Sound button */
-#soundToggle {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 10px 18px;
-  font-size: 16px;
-  border-radius: 8px;
-  background: #444;
-  color: white;
-  border: none;
-  cursor: pointer;
+  transform: none !important;
 }
 </style>
 </head>
-
 <body>
 
-<div id="bg1" class="background" style="background-image: url('https://i.imgur.com/2R0y7kS.jpeg');"></div>
-<div id="bg2" class="background" style="background-image: url('https://i.imgur.com/2R0y7kS.jpeg'); left: 200%;"></div>
+<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 - Version beta alpha sigma prefix bugpatch 1.69 2000</div>
+<div id="titleScreen">Grampa's Life Support Simulator 2000 Edition!</div>
+<div id="instructions">
+  Attempt to kill grandpa by pressing the blue button before the timer runs out!<br>
+  But beware of the annoying ads that try to block you...
+</div>
 
-<img id="grampa" src="https://i.imgur.com/Oa7b0Be.png">
+<img id="lifeSupportImage" src="image1.png" alt="Life Support Image">
+<button id="startButton">Start Game</button>
+<button id="addTimeButton">Kick His Life Support</button>
 
-<img id="milkOverlay" class="milk-overlay" src="https://i.imgur.com/4Cw7pRJ.png">
-<img id="grandmaOverlay" class="grandma-overlay" src="https://i.imgur.com/VYqfX8P.png">
+<div id="timerContainer"><div id="timerBar"></div></div>
+<div id="scoreCounter">Score: 0</div>
+<div id="highScore">High Score: 0</div>
 
-<button id="kickBtn">Kick His Life Support</button>
-<button id="soundToggle">🔊 Sound On</button>
+<div id="gameOverScreen">
+  <div id="gameOverText">💀 Game Over! 💀</div>
+  <div id="finalScore">Final Score: 0</div>
+  <button id="restartButton">Restart</button>
+</div>
 
 <script>
-let kicked = false;
-let soundEnabled = true;
+const adImages = ['ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg','ad6.jpg','ad7.jpg','ad8.jpg','ad9.jpg','ad10.jpg','ad11.jpg','ad12.jpg','ad13.jpg','ad14.jpg','ad15.jpg','ad16.jpg','ad17.jpg','ad18.jpg','ad19.jpg'];
+const adLink = "https://lordmozart.github.io/scam/";
 
-// Sounds
-const kickSound = new Audio("https://cdn.pixabay.com/audio/2021/09/16/audio_322d1e6c52.mp3");
-const grandmaSound = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_57e83b0814.mp3");
+let adsSpawned = 0;
+let adInterval = 800;
+let timer = 10;
+let score = 0;
+let highScore = localStorage.getItem("highScore") || 0;
+let gameInterval, spawnInterval, scoreInterval;
+let canAddTime = true;
+let gameRunning = false;
+let mouseX = 0, mouseY = 0;
 
-// Button
-const kickBtn = document.getElementById("kickBtn");
+document.onmousemove = e => { mouseX = e.clientX; mouseY = e.clientY; };
 
-kickBtn.addEventListener("click", () => {
-  if (kicked) return;
+const timerContainer = document.getElementById("timerContainer");
+const timerBar = document.getElementById("timerBar");
+const scoreCounter = document.getElementById("scoreCounter");
+const highScoreDisplay = document.getElementById("highScore");
+const startButton = document.getElementById("startButton");
+const addTimeButton = document.getElementById("addTimeButton");
+const titleScreen = document.getElementById("titleScreen");
+const instructions = document.getElementById("instructions");
+const lifeSupportImage = document.getElementById("lifeSupportImage");
+const gameOverScreen = document.getElementById("gameOverScreen");
+const restartButton = document.getElementById("restartButton");
+const newUpdateBanner = document.getElementById("newUpdateBanner");
+const finalScore = document.getElementById("finalScore");
 
-  kicked = true;
-  kickBtn.classList.add("disabled");
-  
-  if (soundEnabled) kickSound.play();
+highScoreDisplay.innerText = "High Score: " + highScore;
 
-  document.getElementById("milkOverlay").style.display = "block";
+startButton.onclick = () => {
+  startButton.style.display = "none";
+  instructions.style.display = "none";
+  titleScreen.style.display = "none";
+  addTimeButton.style.display = "block";
+  timerContainer.style.display = "block";
+  newUpdateBanner.style.display = "none";
+  scoreCounter.style.display = "block";
+  highScoreDisplay.style.display = "block";
+  timer = 10; score = 0;
+  updateTimerBar(); updateScore();
+  startTimer(); startScore();
+  spawnInterval = setInterval(spawnAd, adInterval);
+  gameRunning = true;
+};
 
-  setTimeout(() => {
-    document.getElementById("milkOverlay").style.display = "none";
-    document.getElementById("grandmaOverlay").style.display = "block";
+addTimeButton.onclick = () => {
+  if (canAddTime) {
+    timer = Math.min(timer + 2, 10);
+    updateTimerBar();
+    canAddTime = false;
+    addTimeButton.classList.add("disabled");
+    addTimeButton.disabled = true;
+    const originalSrc = lifeSupportImage.src;
+    lifeSupportImage.src = "image2.png";
+    setTimeout(() => { lifeSupportImage.src = originalSrc; }, 750);
+    setTimeout(() => {
+      addTimeButton.classList.remove("disabled");
+      addTimeButton.disabled = false;
+      canAddTime = true;
+    }, 750);
+  }
+};
 
-    if (soundEnabled) grandmaSound.play();
+function startTimer() {
+  gameInterval = setInterval(() => {
+    if (!document.hidden && gameRunning) {
+      timer--; updateTimerBar();
+      if (timer <= 0) endGame();
+    }
+  }, 1000);
+}
 
-  }, 1500);
-});
+function startScore() {
+  scoreInterval = setInterval(() => {
+    if (!document.hidden && gameRunning) {
+      score++; updateScore();
+    }
+  }, 1000);
+}
 
-// Sound toggle
-document.getElementById("soundToggle").addEventListener("click", () => {
-  soundEnabled = !soundEnabled;
-  document.getElementById("soundToggle").textContent =
-    soundEnabled ? "🔊 Sound On" : "🔇 Sound Off";
-});
+function updateTimerBar() {
+  let cappedTime = Math.min(timer, 10);
+  let percent = Math.max(0, (cappedTime / 10) * 100);
+  timerBar.style.width = percent + "%";
+  timerBar.style.background =
+    percent > 50 ? "linear-gradient(90deg,#28a745,#218838)" :
+    percent > 20 ? "linear-gradient(90deg,#ffc107,#ffb007)" :
+    "linear-gradient(90deg,#dc3545,#b02a37)";
+}
+
+function updateScore() { scoreCounter.innerText = "Score: " + score; }
+
+/* spawn ads */
+function spawnAd() {
+  adsSpawned++;
+  const adDiv = document.createElement("div");
+  adDiv.classList.add("ad");
+
+  // Close button
+  const closeBtn = document.createElement("div");
+  closeBtn.classList.add("close-btn");
+  closeBtn.textContent = "✖";
+  closeBtn.onclick = (e) => {
+    e.stopPropagation();
+    adDiv.remove();
+  };
+  adDiv.appendChild(closeBtn);
+
+  const adImage = new Image();
+  adImage.src = adImages[Math.floor(Math.random()*adImages.length)];
+  adDiv.appendChild(adImage);
+  document.body.appendChild(adDiv);
+  makeDraggable(adDiv);
+
+  const buttonRect = addTimeButton.getBoundingClientRect();
+  let spawnX, spawnY;
+
+  let spawnNearCursor = Math.random() < 0.1;
+  let spawnNearButton = !spawnNearCursor && Math.random() < 0.5;
+
+  if (spawnNearCursor) {
+    spawnX = mouseX - 80 + (Math.random()*50-25);
+    spawnY = mouseY - 80 + (Math.random()*50-25);
+  } else if (spawnNearButton && buttonRect.width && buttonRect.height) {
+    spawnX = buttonRect.left + (Math.random()*buttonRect.width-80);
+    spawnY = buttonRect.top + (Math.random()*buttonRect.height-80);
+  } else {
+    spawnX = Math.random()*(window.innerWidth-160);
+    spawnY = Math.random()*(window.innerHeight-160);
+  }
+
+  adDiv.style.top = spawnY+"px";
+  adDiv.style.left = spawnX+"px";
+
+  if (adsSpawned % 20 === 0) {
+    adInterval = Math.max(adInterval-100,200);
+    clearInterval(spawnInterval);
+    spawnInterval = setInterval(spawnAd, adInterval);
+  }
+}
+
+/* draggable */
+function makeDraggable(element) {
+  let pos1=0, pos2=0, pos3=0, pos4=0;
+  let isDragging = false;
+
+  function getClientPos(e) {
+    if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  function dragStart(e) {
+    e.preventDefault();
+    const pos = getClientPos(e);
+    pos3 = pos.x;
+    pos4 = pos.y;
+    isDragging = false;
+    document.onmouseup = closeDrag;
+    document.onmousemove = dragElement;
+    document.ontouchend = closeDrag;
+    document.ontouchmove = dragElement;
+  }
+
+  function dragElement(e) {
+    e.preventDefault();
+    isDragging = true;
+    const pos = getClientPos(e);
+    pos1 = pos3 - pos.x;
+    pos2 = pos4 - pos.y;
+    pos3 = pos.x;
+    pos4 = pos.y;
+    element.style.top = (element.offsetTop - pos2) + "px";
+    element.style.left = (element.offsetLeft - pos1) + "px";
+  }
+
+  function closeDrag(e) {
+    document.onmouseup = null;
+    document.onmousemove = null;
+    document.ontouchend = null;
+    document.ontouchmove = null;
+    if (!isDragging) {
+      if (!e.target.classList.contains("close-btn")) {
+        window.open(adLink, "_blank");
+      }
+    } else {
+      if (
+        element.offsetLeft < 20 ||
+        element.offsetTop < 20 ||
+        element.offsetLeft + element.offsetWidth > window.innerWidth - 20 ||
+        element.offsetTop + element.offsetHeight > window.innerHeight - 20
+      ) {
+        element.remove();
+      }
+    }
+  }
+
+  element.onmousedown = dragStart;
+  element.ontouchstart = dragStart;
+  element.ondragstart = e => e.preventDefault();
+}
+
+function endGame() {
+  clearInterval(gameInterval);
+  clearInterval(spawnInterval);
+  clearInterval(scoreInterval);
+  gameRunning=false;
+  finalScore.innerText = "Final Score: " + score;
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem("highScore", highScore);
+  }
+  highScoreDisplay.innerText = "High Score: " + highScore;
+  gameOverScreen.classList.add("show");
+}
+
+restartButton.onclick = () => {
+  document.querySelectorAll(".ad").forEach(ad=>ad.remove());
+  adsSpawned=0; adInterval=800; timer=10; score=0;
+  gameOverScreen.classList.remove("show");
+  startButton.style.display="block";
+  instructions.style.display="block";
+  titleScreen.style.display="block";
+  newUpdateBanner.style.display="block";
+  addTimeButton.style.display="none";
+  timerContainer.style.display="none";
+  updateScore(); updateTimerBar();
+};
 </script>
-
 </body>
 </html>
