@@ -465,7 +465,7 @@ function endGame() {
 
 restartButton.onclick = () => {
   document.querySelectorAll(".ad").forEach(ad=>ad.remove());
-  adsSpawned=0; adInterval=1200; timer=10; score=0;
+  adsSpawned=0; adInterval=900; timer=10; score=0;
   gameOverScreen.classList.remove("show");
   startButton.style.display="block";
   instructions.style.display="block";
