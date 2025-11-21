@@ -343,7 +343,7 @@ function spawnAd() {
 
   const closeBtn = document.createElement("div");
   closeBtn.classList.add("close-btn");
-  closeBtn.textContent = "✖";
+  closeBtn.textContent = "X";
   closeBtn.onclick = (e) => { e.stopPropagation(); adDiv.remove(); };
   adDiv.appendChild(closeBtn);
 
