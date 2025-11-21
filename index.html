@@ -233,7 +233,7 @@ body {
 <div id="newUpdateBanner">🚨 NEW UPDATE 🚨 - Version beta alpha sigma prefix bugpatch 1.69 2000</div>
 <div id="titleScreen">Grampa's Life Support Simulator 2000 Edition!</div>
 <div id="instructions">
-  Attempt to keep grandpa comatose by pressing the blue button before the timer runs out!<br>
+  Attempt to kill grandpa by pressing the blue button before the timer runs out!<br>
   But beware of the annoying ads that try to block you...
 </div>
 
@@ -256,7 +256,7 @@ const adImages = ['ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg','ad6.jpg','a
 const adLink = "https://lordmozart.github.io/scam/";
 
 let adsSpawned = 0;
-let adInterval = 800;
+let adInterval = 1200; // spawn slightly less frequent
 let timer = 10;
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
@@ -362,7 +362,7 @@ function spawnAd() {
   adImage.src = adImages[Math.floor(Math.random()*adImages.length)];
   adDiv.appendChild(adImage);
   document.body.appendChild(adDiv);
-  makeDraggable(adDiv);
+  makeDraggable(adDiv, true); // pass true to enable mobile dragging
 
   const buttonRect = addTimeButton.getBoundingClientRect();
   let spawnX, spawnY;
@@ -385,14 +385,14 @@ function spawnAd() {
   adDiv.style.left = spawnX+"px";
 
   if (adsSpawned % 20 === 0) {
-    adInterval = Math.max(adInterval-100,200);
+    adInterval = Math.max(adInterval-100, 400);
     clearInterval(spawnInterval);
     spawnInterval = setInterval(spawnAd, adInterval);
   }
 }
 
-/* draggable */
-function makeDraggable(element) {
+/* draggable with mobile support */
+function makeDraggable(element, mobile=false) {
   let pos1=0, pos2=0, pos3=0, pos4=0;
   let isDragging = false;
 
@@ -404,13 +404,14 @@ function makeDraggable(element) {
   function dragStart(e) {
     e.preventDefault();
     const pos = getClientPos(e);
-    pos3 = pos.x;
-    pos4 = pos.y;
+    pos3 = pos.x; pos4 = pos.y;
     isDragging = false;
     document.onmouseup = closeDrag;
     document.onmousemove = dragElement;
-    document.ontouchend = closeDrag;
-    document.ontouchmove = dragElement;
+    if (mobile) {
+      document.ontouchend = closeDrag;
+      document.ontouchmove = dragElement;
+    }
   }
 
   function dragElement(e) {
@@ -419,8 +420,7 @@ function makeDraggable(element) {
     const pos = getClientPos(e);
     pos1 = pos3 - pos.x;
     pos2 = pos4 - pos.y;
-    pos3 = pos.x;
-    pos4 = pos.y;
+    pos3 = pos.x; pos4 = pos.y;
     element.style.top = (element.offsetTop - pos2) + "px";
     element.style.left = (element.offsetLeft - pos1) + "px";
   }
@@ -447,7 +447,7 @@ function makeDraggable(element) {
   }
 
   element.onmousedown = dragStart;
-  element.ontouchstart = dragStart;
+  if (mobile) element.ontouchstart = dragStart;
   element.ondragstart = e => e.preventDefault();
 }
 
@@ -467,7 +467,7 @@ function endGame() {
 
 restartButton.onclick = () => {
   document.querySelectorAll(".ad").forEach(ad=>ad.remove());
-  adsSpawned=0; adInterval=800; timer=10; score=0;
+  adsSpawned=0; adInterval=1200; timer=10; score=0;
   gameOverScreen.classList.remove("show");
   startButton.style.display="block";
   instructions.style.display="block";
