@@ -30,6 +30,7 @@ body {
   animation: floatIn 0.4s ease;
   background-color: white;
   transition: transform 0.15s;
+  touch-action: none; /* Prevent mobile scrolling while dragging */
 }
 .ad:hover { transform: scale(1.05); }
 .ad img {
@@ -354,7 +355,7 @@ function spawnAd() {
 
   const closeBtn = document.createElement("div");
   closeBtn.classList.add("close-btn");
-  closeBtn.textContent = "X";
+  closeBtn.textContent = "✖";
   closeBtn.onclick = (e) => { e.stopPropagation(); adDiv.remove(); };
   adDiv.appendChild(closeBtn);
 
@@ -362,7 +363,7 @@ function spawnAd() {
   adImage.src = adImages[Math.floor(Math.random()*adImages.length)];
   adDiv.appendChild(adImage);
   document.body.appendChild(adDiv);
-  makeDraggable(adDiv, true); // pass true to enable mobile dragging
+  makeDraggable(adDiv, true); // mobile dragging enabled
 
   const buttonRect = addTimeButton.getBoundingClientRect();
   let spawnX, spawnY;
@@ -395,6 +396,7 @@ function spawnAd() {
 function makeDraggable(element, mobile=false) {
   let pos1=0, pos2=0, pos3=0, pos4=0;
   let isDragging = false;
+  const dragThreshold = 5; // pixels to consider a drag
 
   function getClientPos(e) {
     if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -416,13 +418,19 @@ function makeDraggable(element, mobile=false) {
 
   function dragElement(e) {
     e.preventDefault();
-    isDragging = true;
     const pos = getClientPos(e);
+    const deltaX = Math.abs(pos.x - pos3);
+    const deltaY = Math.abs(pos.y - pos4);
+    if (!isDragging && (deltaX > dragThreshold || deltaY > dragThreshold)) {
+      isDragging = true;
+    }
     pos1 = pos3 - pos.x;
     pos2 = pos4 - pos.y;
     pos3 = pos.x; pos4 = pos.y;
-    element.style.top = (element.offsetTop - pos2) + "px";
-    element.style.left = (element.offsetLeft - pos1) + "px";
+    if (isDragging) {
+      element.style.top = (element.offsetTop - pos2) + "px";
+      element.style.left = (element.offsetLeft - pos1) + "px";
+    }
   }
 
   function closeDrag(e) {
