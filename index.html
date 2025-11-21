@@ -88,6 +88,12 @@ body {
   transform: translateX(-50%) scale(1.08); /* stays centered */
 }
 
+#addTimeButton.disabled:hover {
+  transform: translateX(-50%) scale(1); /* stay exactly in place */
+  background: gray !important;
+  cursor: not-allowed;
+}
+
 #startButton:hover {
   background: linear-gradient(135deg, #0056b3, #004097);
   transform: scale(1.08); /* just scale, no translate */
