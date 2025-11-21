@@ -226,7 +226,11 @@ body {
 .disabled {
   background: gray !important;
   cursor: not-allowed;
-  transform: none !important;
+  /* keep the original translateX(-50%) so the button stays centered;
+     visually indicate disabled without removing centering transform */
+  opacity: 0.7 !important;
+  filter: grayscale(40%) !important;
+  pointer-events: none;
 }
 </style>
 </head>
