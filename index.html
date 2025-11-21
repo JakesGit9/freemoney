@@ -31,9 +31,7 @@ body {
   background-color: white;
   transition: transform 0.15s;
 }
-.ad:hover {
-  transform: scale(1.05);
-}
+.ad:hover { transform: scale(1.05); }
 .ad img {
   display: block;
   max-width: 160px;
@@ -60,10 +58,7 @@ body {
   z-index: 15;
   transition: background-color 0.2s, transform 0.15s;
 }
-.ad .close-btn:hover {
-  background: red;
-  transform: scale(1.2);
-}
+.ad .close-btn:hover { background: red; transform: scale(1.2); }
 
 @keyframes floatIn {
   0% { transform: scale(0.6) rotate(-5deg); opacity: 0; }
@@ -83,22 +78,9 @@ body {
   box-shadow: 0 6px 14px rgba(0,0,0,0.3);
 }
 
-#addTimeButton:hover {
-  background: linear-gradient(135deg, #0056b3, #004097);
-  transform: translateX(-50%) scale(1.08); /* stays centered */
-}
+#startButton:hover { background: linear-gradient(135deg, #0056b3, #004097); transform: scale(1.08); }
 
-#addTimeButton.disabled:hover {
-  transform: translateX(-50%) scale(1); /* stay exactly in place */
-  background: gray !important;
-  cursor: not-allowed;
-}
-
-#startButton:hover {
-  background: linear-gradient(135deg, #0056b3, #004097);
-  transform: scale(1.08); /* just scale, no translate */
-}
-
+/* Kick His Life Support button fixes */
 #addTimeButton {
   display: none;
   position: absolute;
@@ -106,9 +88,22 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 0;
+  transition: transform 0.3s, background 0.3s;
 }
-#addTimeButton:active {
+#addTimeButton:hover:not(.disabled) {
+  transform: translateX(-50%) scale(1.08);
+}
+#addTimeButton:active:not(.disabled) {
   transform: translateX(-50%) scale(0.95);
+}
+#addTimeButton.disabled {
+  background: gray !important;
+  cursor: not-allowed;
+  transform: translateX(-50%) scale(1);
+}
+#addTimeButton.disabled:hover {
+  transform: translateX(-50%) scale(1);
+  cursor: not-allowed;
 }
 
 #startButton { margin-top: 20px; z-index: 50; }
@@ -158,9 +153,7 @@ body {
   z-index: 100;
   transition: transform 0.3s ease;
 }
-#lifeSupportImage:active {
-  transform: rotate(-5deg) scale(0.97);
-}
+#lifeSupportImage:active { transform: rotate(-5deg) scale(0.97); }
 
 #timerContainer {
   position: absolute;
@@ -189,14 +182,8 @@ body {
   color: #222;
   text-shadow: 0 1px 2px rgba(255,255,255,0.4);
 }
-#scoreCounter {
-  top: 15px;
-  font-size: 24px;
-}
-#highScore {
-  top: 50px;
-  font-size: 20px;
-}
+#scoreCounter { top: 15px; font-size: 24px; }
+#highScore { top: 50px; font-size: 20px; }
 
 /* game over */
 #gameOverScreen {
@@ -229,10 +216,7 @@ body {
   transition: all 0.3s;
   box-shadow: 0 6px 14px rgba(0,0,0,0.4);
 }
-#restartButton:hover {
-  background: linear-gradient(90deg, #cc0000, #990000);
-  transform: scale(1.05);
-}
+#restartButton:hover { background: linear-gradient(90deg, #cc0000, #990000); transform: scale(1.05); }
 
 .disabled {
   background: gray !important;
@@ -365,14 +349,10 @@ function spawnAd() {
   const adDiv = document.createElement("div");
   adDiv.classList.add("ad");
 
-  // Close button
   const closeBtn = document.createElement("div");
   closeBtn.classList.add("close-btn");
   closeBtn.textContent = "✖";
-  closeBtn.onclick = (e) => {
-    e.stopPropagation();
-    adDiv.remove();
-  };
+  closeBtn.onclick = (e) => { e.stopPropagation(); adDiv.remove(); };
   adDiv.appendChild(closeBtn);
 
   const adImage = new Image();
