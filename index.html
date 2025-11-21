@@ -83,9 +83,14 @@ body {
   box-shadow: 0 6px 14px rgba(0,0,0,0.3);
 }
 
-#startButton:hover, #addTimeButton:hover {
+#addTimeButton:hover {
   background: linear-gradient(135deg, #0056b3, #004097);
-  transform: translateX(-50%) scale(1.08); /* FIXED: stay centered */
+  transform: translateX(-50%) scale(1.08); /* stays centered */
+}
+
+#startButton:hover {
+  background: linear-gradient(135deg, #0056b3, #004097);
+  transform: scale(1.08); /* just scale, no translate */
 }
 
 #addTimeButton {
