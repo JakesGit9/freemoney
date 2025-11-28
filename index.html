@@ -49,7 +49,7 @@ body {
   background: rgba(0,0,0,0.6);
   color: white;
   font-weight: bold;
-  font-family: 'Comic Sans MS', Arial, sans-serif;
+  font-family: sans-serif;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -220,7 +220,7 @@ body {
 </head>
 <body>
 
-<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 - Version: 69.14159/div>
+<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 - Version beta alpha sigma prefix bugpatch 1.69 2000</div>
 <div id="titleScreen">Grampa's Life Support Simulator 2000 Edition!</div>
 <div id="instructions">
   Attempt to keep grandpa comatose for the insurence money by pressing the blue button before the timer runs out!<br>
@@ -455,7 +455,7 @@ function endGame() {
   clearInterval(spawnInterval);
   clearInterval(scoreInterval);
   gameRunning=false;
-  finalScore.innerText = "Time spent kicking life support: " + score + "seconds";
+  finalScore.innerText = "Final Score: " + score;
   if (score > highScore) {
     highScore = score;
     localStorage.setItem("highScore", highScore);
