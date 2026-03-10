@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Grampa's Life Support Simulator: Roguelike Edition!</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #cfd8dc, #90a4ae);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-family: 'Comic Sans MS', Arial, sans-serif;
+  user-select: none;
+}
+
+/* ads */
+.ad {
+  position: absolute;
+  cursor: grab;
+  z-index: 10;
+  opacity: 0.97;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  animation: floatIn 0.4s ease;
+  background-color: white;
+  transition: transform 0.15s;
+  touch-action: none;
+}
+.ad:hover { transform: scale(1.05); }
+.ad img {
+  display: block;
+  max-width: 160px;
+  max-height: 160px;
+  border-radius: 8px;
+  user-select: none;
+  pointer-events: none;
+  /* Support for scaling via upgrades */
+  transition: width 0.3s, height 0.3s;
+}
+.ad .close-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  font-weight: bold;
+  font-family: sans-serif;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  line-height: 24px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 15;
+  border: 2px solid white;
+  transition: background-color 0.2s, transform 0.15s;
+}
+.ad .close-btn:hover { background: red; transform: scale(1.2); }
+
+/* Roguelike Ad Variants */
+.ad.jiggling {
+  animation: jiggle 0.5s infinite alternate;
+}
+@keyframes jiggle {
+  0% { transform: translate(0, 0) rotate(-2deg); }
+  100% { transform: translate(10px, 10px) rotate(2deg); }
+}
+.ad.armored {
+  border: 4px solid #555;
+  background-color: #333;
+}
+.ad.armored .close-btn {
+  background: #555;
+  color: #ccc;
+}
+.blocked-ad-text {
+  position: absolute;
+  color: red;
+  font-weight: bold;
+  font-size: 20px;
+  text-shadow: 1px 1px 0 #fff;
+  pointer-events: none;
+  animation: floatUpFade 1s forwards;
+  z-index: 5;
+}
+@keyframes floatUpFade {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-30px); opacity: 0; }
+}
+
+@keyframes floatIn {
+  0% { transform: scale(0.6) rotate(-5deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* buttons */
+#startButton, #addTimeButton {
+  padding: 28px 40px;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 14px;
+  transition: all 0.3s;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+}
+
+#startButton:hover { background: linear-gradient(135deg, #0056b3, #004097); transform: scale(1.08); }
+
+#addTimeButton {
+  display: none;
+  margin-top: 10px;
+  z-index: 0;
+}
+
+#addTimeButton:hover:not(.disabled) { transform: scale(1.08); }
+#addTimeButton:active:not(.disabled) { transform: scale(0.95); }
+
+#addTimeButton.disabled {
+  background: gray !important;
+  cursor: not-allowed;
+  transform: scale(1) !important;
+}
+
+#startButton { margin-top: 20px; z-index: 50; }
+
+#titleScreen {
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 10px;
+  text-align: center;
+  text-shadow: 2px 2px 8px #00000055;
+  color: #222;
+}
+
+#newUpdateBanner {
+  background: linear-gradient(90deg, #ff4444, #ff7777);
+  color: white;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  font-size: 22px;
+  animation: pulse 1.2s infinite;
+  z-index: 50;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1 }
+  50% { transform: scale(1.1); opacity: 0.85 }
+  100% { transform: scale(1); opacity: 1 }
+}
+
+#instructions {
+  font-size: 19px;
+  margin-bottom: 20px;
+  text-align: center;
+  max-width: 500px;
+  z-index: 50;
+  color: #333;
+}
+
+/* HUD */
+#lifeSupportImage {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 100;
+  transition: transform 0.3s ease;
+  /* Fallback styling if images are missing */
+  background-color: #eee;
+  border-radius: 10px;
+}
+#lifeSupportImage:active { transform: rotate(-5deg) scale(0.97); }
+
+#timerContainer {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  background-color: #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+  display: none;
+  z-index: 100;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+}
+#timerBar {
+  height: 25px;
+  width: 100%;
+  background: linear-gradient(90deg, #28a745, #218838);
+  transition: width 0.3s, background-color 0.3s;
+}
+
+#hudLeft {
+  position: absolute;
+  left: 20px;
+  top: 15px;
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 90;
+}
+.hud-text {
+  font-weight: bold;
+  color: #222;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.4);
+  font-size: 20px;
+}
+#scoreCounter { font-size: 26px; }
+#levelCounter { color: #0056b3; }
+#xpBarContainer {
+  width: 150px;
+  height: 10px;
+  background: #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+#xpBar {
+  height: 100%;
+  width: 0%;
+  background: #007bff;
+  transition: width 0.3s;
+}
+
+/* Roguelike Level Up Modal */
+#levelUpScreen {
+  display: none;
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  z-index: 300;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+#levelUpScreen.show { display: flex; }
+.level-up-box {
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  border: 4px solid #ffcc00;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  max-width: 800px;
+  width: 90%;
+}
+.level-up-title {
+  font-size: 32px;
+  color: #d32f2f;
+  margin-bottom: 20px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.upgrade-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.upgrade-card {
+  background: #f8f9fa;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  width: 200px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.upgrade-card:hover {
+  transform: scale(1.05) translateY(-10px);
+  border-color: #007bff;
+  background: #e9ecef;
+  box-shadow: 0 8px 15px rgba(0,123,255,0.3);
+}
+.upgrade-icon { font-size: 40px; margin-bottom: 10px; }
+.upgrade-name { font-size: 18px; font-weight: bold; margin-bottom: 5px; color: #333; }
+.upgrade-desc { font-size: 14px; color: #666; }
+
+/* game over */
+#gameOverScreen {
+  display: none;
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  color: white;
+  font-size: 42px;
+  font-weight: bold;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 400;
+  opacity: 0;
+  transition: opacity 0.8s;
+  text-align: center;
+}
+#gameOverScreen.show { display: flex; opacity: 1; }
+#finalScore { font-size: 28px; margin-top: 15px; }
+
+#restartButton {
+  margin-top: 25px;
+  padding: 16px 30px;
+  font-size: 22px;
+  background: linear-gradient(90deg, #ff4444, #cc0000);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+}
+#restartButton:hover { background: linear-gradient(90deg, #cc0000, #990000); transform: scale(1.05); }
+
+</style>
+</head>
+<body>
+
+<div id="newUpdateBanner">🚨 NEW UPDATE 🚨 - Version Roguelike Beta 2.0</div>
+<div id="titleScreen">Grampa's Life Support:<br>Roguelike Edition!</div>
+<div id="instructions">
+  Kick life support to keep Grandpa alive for inheritance money!<br>
+  Survive to level up and choose <b>Will Amendments</b> (Upgrades).<br>
+  Beware: The ads get stronger the longer he lives...
+</div>
+
+<!-- Added Fallback backgrounds via inline styling in case image1.png doesn't load -->
+<img id="lifeSupportImage" src="image1.png" alt="Life Support Image" onerror="this.style.background='#ffcccc'; this.alt='(Grandpa Image Missing)';">
+<button id="addTimeButton">Kick His Life Support</button>
+<button id="startButton">Start Run</button>
+
+<div id="timerContainer"><div id="timerBar"></div></div>
+
+<div id="hudLeft">
+  <div id="scoreCounter" class="hud-text">Day: 0</div>
+  <div id="highScore" class="hud-text">Best Run: 0</div>
+  <div id="levelCounter" class="hud-text">Level: 1</div>
+  <div id="xpBarContainer"><div id="xpBar"></div></div>
+</div>
+
+<div id="levelUpScreen">
+  <div class="level-up-box">
+    <div class="level-up-title">🎉 Grandpa Amended His Will! 🎉</div>
+    <div class="upgrade-container" id="upgradeContainer">
+      <!-- Upgrades injected via JS -->
+    </div>
+  </div>
+</div>
+
+<div id="gameOverScreen">
+  <div id="gameOverText">💀 Inheritance Lost! 💀</div>
+  <div id="finalScore">Days Survived: 0</div>
+  <div id="finalLevel" style="font-size: 20px; color: #aaa; margin-top: 10px;">Level Reached: 1</div>
+  <button id="restartButton">Try Another Grampa</button>
+</div>
+
+<script>
+// Keep original ad images and link
+const adImages = ['ad1.jpg','ad2.jpg','ad3.jpg','ad4.jpg','ad5.jpg','ad6.jpg','ad7.jpg','ad8.jpg','ad9.jpg','ad10.jpg','ad11.jpg','ad12.jpg','ad13.jpg','ad14.jpg','ad15.jpg','ad16.jpg','ad17.jpg','ad18.jpg','ad19.jpg','ad20.jpg','ad21.jpg','ad22.jpg','ad23.jpg'];
+const adLink = "https://deviceinfection.netlify.app/";
+
+// --- ROGUELIKE STATE ---
+let playerStats = {
+  kickPower: 2,         // Time added per click
+  maxTime: 10,          // Maximum timer capacity
+  adBlockChance: 0,     // % chance an ad is instantly blocked
+  adSize: 1,            // Multiplier for ad image size
+  autoKick: 0,          // Free time added per second
+  jiggleChance: 0,      // % chance for ads to move
+  armoredChance: 0      // % chance for ads to require 3 clicks
+};
+
+let level = 1;
+let xp = 0;
+let xpNeeded = 10;      // Increases each level
+let score = 0;          // "Days" survived
+let highScore = localStorage.getItem("highScoreRoguelike") || 0;
+
+let timer = playerStats.maxTime;
+let adsSpawned = 0;
+let adInterval = 800;
+let gameInterval, spawnInterval, scoreInterval;
+let canAddTime = true;
+let gameRunning = false;
+let isPaused = false;
+let mouseX = 0, mouseY = 0;
+
+// --- ROGUELIKE UPGRADES POOL ---
+const ALL_UPGRADES = [
+  { id: 'kick', icon: '🥾', name: 'Steel Toe Boots', desc: '+1.5s added per Kick', weight: 10, apply: () => playerStats.kickPower += 1.5 },
+  { id: 'lungs', icon: '🫁', name: 'Iron Lungs', desc: '+4s Max Timer Capacity', weight: 10, apply: () => { playerStats.maxTime += 4; timer += 4; updateTimerBar(); } },
+  { id: 'adblock', icon: '🛡️', name: 'Pirated AdBlock', desc: '+15% chance to auto-close Ads', weight: 8, apply: () => playerStats.adBlockChance += 0.15 },
+  { id: 'shrink', icon: '🔍', name: 'Tiny Ads', desc: 'Ads are 20% smaller', weight: 7, apply: () => playerStats.adSize *= 0.8 },
+  { id: 'autokick', icon: '🤖', name: 'Drinking Bird Toy', desc: 'Auto-kicks (+0.5s per sec)', weight: 5, apply: () => playerStats.autoKick += 0.5 },
+  { id: 'heal', icon: '💉', name: 'Adrenaline Shot', desc: 'Instantly fully restores timer', weight: 12, apply: () => timer = playerStats.maxTime }
+];
+
+document.onmousemove = e => { mouseX = e.clientX; mouseY = e.clientY; };
+
+// DOM Elements
+const timerContainer = document.getElementById("timerContainer");
+const timerBar = document.getElementById("timerBar");
+const hudLeft = document.getElementById("hudLeft");
+const scoreCounter = document.getElementById("scoreCounter");
+const highScoreDisplay = document.getElementById("highScore");
+const levelCounter = document.getElementById("levelCounter");
+const xpBar = document.getElementById("xpBar");
+const startButton = document.getElementById("startButton");
+const addTimeButton = document.getElementById("addTimeButton");
+const titleScreen = document.getElementById("titleScreen");
+const instructions = document.getElementById("instructions");
+const lifeSupportImage = document.getElementById("lifeSupportImage");
+const gameOverScreen = document.getElementById("gameOverScreen");
+const restartButton = document.getElementById("restartButton");
+const newUpdateBanner = document.getElementById("newUpdateBanner");
+const finalScore = document.getElementById("finalScore");
+const finalLevel = document.getElementById("finalLevel");
+const levelUpScreen = document.getElementById("levelUpScreen");
+const upgradeContainer = document.getElementById("upgradeContainer");
+
+highScoreDisplay.innerText = "Best Run: " + highScore;
+
+function resetGame() {
+  playerStats = { kickPower: 2, maxTime: 10, adBlockChance: 0, adSize: 1, autoKick: 0, jiggleChance: 0, armoredChance: 0 };
+  level = 1;
+  xp = 0;
+  xpNeeded = 10;
+  score = 0;
+  timer = playerStats.maxTime;
+  adsSpawned = 0;
+  adInterval = 800;
+  isPaused = false;
+  
+  document.querySelectorAll(".ad").forEach(ad => ad.remove());
+  document.querySelectorAll(".blocked-ad-text").forEach(txt => txt.remove());
+  
+  updateHUD();
+  updateTimerBar();
+}
+
+startButton.onclick = () => {
+  startButton.style.display = "none";
+  instructions.style.display = "none";
+  titleScreen.style.display = "none";
+  newUpdateBanner.style.display = "none";
+  
+  addTimeButton.style.display = "block";
+  timerContainer.style.display = "block";
+  hudLeft.style.display = "flex";
+  
+  resetGame();
+  startGameLoop();
+};
+
+addTimeButton.onclick = () => {
+  if (canAddTime && !isPaused) {
+    timer = Math.min(timer + playerStats.kickPower, playerStats.maxTime);
+    updateTimerBar();
+    canAddTime = false;
+    addTimeButton.classList.add("disabled");
+    
+    const originalSrc = lifeSupportImage.src;
+    // Keep original behavior. If image2.png doesn't exist, onerror handles it gracefully.
+    lifeSupportImage.src = "image2.png"; 
+    
+    setTimeout(() => { if(!isPaused) lifeSupportImage.src = originalSrc; }, 400);
+    setTimeout(() => {
+      addTimeButton.classList.remove("disabled");
+      canAddTime = true;
+    }, 500); // reduced cooldown slightly for roguelike pacing
+  }
+};
+
+function startGameLoop() {
+  gameRunning = true;
+  
+  // Logic ticks 10 times a second for smoother bars
+  gameInterval = setInterval(() => {
+    if (!document.hidden && gameRunning && !isPaused) {
+      // Drain timer
+      timer -= 0.1;
+      
+      // Auto kick applies here (divided by 10 since it runs 10x a second)
+      if(playerStats.autoKick > 0) {
+        timer = Math.min(timer + (playerStats.autoKick / 10), playerStats.maxTime);
+      }
+      
+      updateTimerBar();
+      if (timer <= 0) endGame();
+    }
+  }, 100);
+
+  // Score/XP tick every 1 second
+  scoreInterval = setInterval(() => {
+    if (!document.hidden && gameRunning && !isPaused) {
+      score++;
+      xp++;
+      checkLevelUp();
+      updateHUD();
+      
+      // Difficulty Scaling: Increase ad stats gradually
+      if(score % 15 === 0) {
+         playerStats.jiggleChance = Math.min(playerStats.jiggleChance + 0.1, 0.6);
+         playerStats.armoredChance = Math.min(playerStats.armoredChance + 0.05, 0.4);
+      }
+    }
+  }, 1000);
+
+  startAdSpawner();
+}
+
+function startAdSpawner() {
+  clearInterval(spawnInterval);
+  spawnInterval = setInterval(() => {
+    if(!isPaused && gameRunning && !document.hidden) spawnAd();
+  }, adInterval);
+}
+
+function updateTimerBar() {
+  let percent = Math.max(0, (timer / playerStats.maxTime) * 100);
+  timerBar.style.width = percent + "%";
+  timerBar.style.background =
+    percent > 50 ? "linear-gradient(90deg,#28a745,#218838)" :
+    percent > 20 ? "linear-gradient(90deg,#ffc107,#ffb007)" :
+    "linear-gradient(90deg,#dc3545,#b02a37)";
+}
+
+function updateHUD() { 
+  scoreCounter.innerText = "Day: " + score; 
+  levelCounter.innerText = "Level: " + level;
+  xpBar.style.width = ((xp / xpNeeded) * 100) + "%";
+}
+
+// --- LEVEL UP LOGIC ---
+function checkLevelUp() {
+  if (xp >= xpNeeded) {
+    xp = 0;
+    level++;
+    xpNeeded = Math.floor(xpNeeded * 1.5); // Increase xp needed
+    triggerLevelUp();
+  }
+}
+
+function triggerLevelUp() {
+  isPaused = true;
+  
+  // Select 3 random unique upgrades
+  let available = [...ALL_UPGRADES].sort(() => 0.5 - Math.random());
+  let choices = available.slice(0, 3);
+  
+  upgradeContainer.innerHTML = '';
+  choices.forEach(upg => {
+    let card = document.createElement('div');
+    card.className = 'upgrade-card';
+    card.innerHTML = `
+      <div class="upgrade-icon">${upg.icon}</div>
+      <div class="upgrade-name">${upg.name}</div>
+      <div class="upgrade-desc">${upg.desc}</div>
+    `;
+    card.onclick = () => selectUpgrade(upg);
+    upgradeContainer.appendChild(card);
+  });
+  
+  levelUpScreen.classList.add("show");
+}
+
+function selectUpgrade(upgrade) {
+  upgrade.apply();
+  levelUpScreen.classList.remove("show");
+  isPaused = false;
+  
+  // Re-sync UI
+  updateHUD();
+  updateTimerBar();
+  
+  // Slightly increase difficulty on level up
+  adInterval = Math.max(adInterval - 40, 250);
+  startAdSpawner(); 
+}
+
+// --- AD SYSTEM ---
+function spawnAd() {
+  // Roguelike Stat: AdBlock Chance
+  if (Math.random() < playerStats.adBlockChance) {
+    showBlockedText();
+    return;
+  }
+
+  adsSpawned++;
+  const adDiv = document.createElement("div");
+  adDiv.classList.add("ad");
+  
+  // Roguelike Enemy Variants
+  let isArmored = Math.random() < playerStats.armoredChance;
+  let isJiggling = Math.random() < playerStats.jiggleChance;
+  
+  if(isJiggling) adDiv.classList.add("jiggling");
+  if(isArmored) {
+    adDiv.classList.add("armored");
+    adDiv.dataset.hp = 3; // takes 3 clicks
+  }
+
+  const closeBtn = document.createElement("div");
+  closeBtn.classList.add("close-btn");
+  closeBtn.textContent = "X";
+  
+  closeBtn.onclick = (e) => { 
+    e.stopPropagation(); 
+    if(isArmored) {
+      let hp = parseInt(adDiv.dataset.hp) - 1;
+      adDiv.dataset.hp = hp;
+      closeBtn.textContent = hp;
+      closeBtn.style.background = hp === 1 ? "red" : "#880000";
+      if(hp <= 0) adDiv.remove();
+    } else {
+      adDiv.remove(); 
+    }
+  };
+  
+  adDiv.appendChild(closeBtn);
+
+  const adImg = new Image();
+  // Fallback to random colored div if image fails
+  adImg.onerror = function() {
+      this.style.width = '150px'; 
+      this.style.height = '100px'; 
+      this.style.background = `hsl(${Math.random()*360}, 70%, 80%)`;
+      this.alt = 'Ad';
+  };
+  adImg.src = adImages[Math.floor(Math.random()*adImages.length)] || "ad1.jpg";
+  
+  // Roguelike Stat: Ad Size
+  adImg.style.width = (160 * playerStats.adSize) + "px";
+  
+  adDiv.appendChild(adImg);
+  document.body.appendChild(adDiv);
+  makeDraggable(adDiv, true);
+
+  // Spawning logic (same as original)
+  const buttonRect = addTimeButton.getBoundingClientRect();
+  let spawnX, spawnY;
+
+  let spawnNearCursor = Math.random() < 0.15;
+  let spawnNearButton = !spawnNearCursor && Math.random() < 0.6;
+
+  if (spawnNearCursor) {
+    spawnX = mouseX - 80 + (Math.random()*50-25);
+    spawnY = mouseY - 80 + (Math.random()*50-25);
+  } else if (spawnNearButton && buttonRect.width) {
+    spawnX = buttonRect.left + (Math.random()*buttonRect.width-80);
+    spawnY = buttonRect.top + (Math.random()*buttonRect.height-80);
+  } else {
+    spawnX = Math.random()*(window.innerWidth-160);
+    spawnY = Math.random()*(window.innerHeight-160);
+  }
+
+  // Keep in bounds
+  spawnX = Math.max(10, Math.min(spawnX, window.innerWidth - (160 * playerStats.adSize) - 20));
+  spawnY = Math.max(10, Math.min(spawnY, window.innerHeight - 160));
+
+  adDiv.style.top = spawnY+"px";
+  adDiv.style.left = spawnX+"px";
+}
+
+function showBlockedText() {
+  const txt = document.createElement('div');
+  txt.className = 'blocked-ad-text';
+  txt.innerText = 'AD BLOCKED!';
+  txt.style.left = (Math.random() * (window.innerWidth - 100)) + 'px';
+  txt.style.top = (Math.random() * (window.innerHeight - 100)) + 'px';
+  document.body.appendChild(txt);
+  setTimeout(() => txt.remove(), 1000);
+}
+
+// Dragging Logic - Unchanged from original
+function makeDraggable(element, mobile=false) {
+  let pos1=0, pos2=0, pos3=0, pos4=0;
+  let isDragging = false;
+  const dragThreshold = 5;
+
+  function getClientPos(e) {
+    if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  function dragStart(e) {
+    if(isPaused) return; // Prevent drag while leveling up
+    const pos = getClientPos(e);
+    pos3 = pos.x; pos4 = pos.y;
+    isDragging = false;
+
+    if (e.type === 'touchstart') {
+      document.addEventListener('touchmove', dragElement, { passive: false });
+      document.addEventListener('touchend', closeDrag);
+    } else {
+      document.onmousemove = dragElement;
+      document.onmouseup = closeDrag;
+    }
+    if(e.target !== element.querySelector('.close-btn')) e.preventDefault();
+  }
+
+  function dragElement(e) {
+    if(isPaused) return;
+    e.preventDefault();
+    const pos = getClientPos(e);
+    const deltaX = Math.abs(pos.x - pos3);
+    const deltaY = Math.abs(pos.y - pos4);
+    if (!isDragging && (deltaX > dragThreshold || deltaY > dragThreshold)) isDragging = true;
+
+    pos1 = pos3 - pos.x;
+    pos2 = pos4 - pos.y;
+    pos3 = pos.x; pos4 = pos.y;
+
+    if (isDragging) {
+      element.style.top = (element.offsetTop - pos2) + "px";
+      element.style.left = (element.offsetLeft - pos1) + "px";
+    }
+  }
+
+  function closeDrag(e) {
+    if (e.type.startsWith('touch')) {
+      document.removeEventListener('touchmove', dragElement, { passive: false });
+      document.removeEventListener('touchend', closeDrag);
+    } else {
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
+
+    // Clicked ad link check
+    if (!isDragging && !e.target.classList.contains("close-btn") && !isPaused) {
+      window.open(adLink, "_blank");
+    } else if (isDragging) {
+      // Throw ad off screen logic
+      if (
+        element.offsetLeft < -50 ||
+        element.offsetTop < -50 ||
+        element.offsetLeft > window.innerWidth - 50 ||
+        element.offsetTop > window.innerHeight - 50
+      ) element.remove();
+    }
+  }
+
+  element.addEventListener('mousedown', dragStart);
+  if (mobile) element.addEventListener('touchstart', dragStart, { passive: false });
+  element.ondragstart = e => e.preventDefault();
+}
+
+function endGame() {
+  clearInterval(gameInterval);
+  clearInterval(spawnInterval);
+  clearInterval(scoreInterval);
+  gameRunning=false;
+  
+  finalScore.innerText = "Days Survived: " + score;
+  finalLevel.innerText = "Level Reached: " + level;
+  
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem("highScoreRoguelike", highScore);
+  }
+  highScoreDisplay.innerText = "Best Run: " + highScore;
+  gameOverScreen.classList.add("show");
+}
+
+restartButton.onclick = () => {
+  gameOverScreen.classList.remove("show");
+  
+  startButton.style.display="block";
+  instructions.style.display="block";
+  titleScreen.style.display="block";
+  
+  addTimeButton.style.display="none";
+  timerContainer.style.display="none";
+  hudLeft.style.display="none";
+  
+  document.querySelectorAll(".ad").forEach(ad=>ad.remove());
+  document.querySelectorAll(".blocked-ad-text").forEach(txt=>txt.remove());
+};
+</script>
+</body>
+</html>
